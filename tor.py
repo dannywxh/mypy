@@ -18,9 +18,30 @@ def torrent2dict(filename):
     f = open(filename, 'rb')
     s = f.read()
     f.close()
-    d = bencode.bdecode(s)
-    return d
+    try: 
+        d = bencode.bdecode(s)
+        return d
+    except Exception,e:
+        print "bdecode error!"
+        return filename
 
+
+
+def parse_tor(file):
+    bt_path = {}
+
+    bt_file = open(file, 'rb')
+    bt_info = bencode.bdecode(bt_file.read()).get('info')
+    bt_info_hash_hex = hashlib.sha1(bencode.bencode(bt_info)).hexdigest()
+  
+    bt_file_size = bt_info.get('length')
+    bt_file_name = bt_info.get('name')
+    
+    bt_path[bt_file_name]=bt_file_size
+
+    print bt_path 
+
+    bt_file.close()
 
 def parse_info(d):
     ''' 
@@ -39,13 +60,20 @@ def parse_info(d):
             print k, ' : ', info[k]
             raw_input()
     '''
-    info = d.get('info')
     name=''
-    for k in info.keys():
-        if k == 'name':
-            #print k, ':',info[k]
-            name=info[k]
-            break
+
+    print type(d)
+    if isinstance(d,str):
+        name=d
+
+    else:
+        info = d.get('info')
+       
+        for k in info.keys():
+            if k == 'name':
+                #print k, ':',info[k]
+                name=info[k]
+                break
 
     return name
 
@@ -61,9 +89,12 @@ if __name__ == "__main__":
             print '=========== ', f , '===================='
 
             d = torrent2dict(root_path+"/"+f)
-
+ 
             name=parse_info(d)
 
             print name.decode('utf-8')
 
-            os.rename(root_path+"/"+f,root_path+"/"+name.decode('utf-8')+'.torrent')
+            try:
+                os.rename(root_path+"/"+f,root_path+"/"+name.decode('utf-8')+'.torrent')
+            except Exception,e:
+                print "rename error!"

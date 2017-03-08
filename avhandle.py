@@ -1,31 +1,10 @@
-#coding=gbk
-
-import os
-from os.path import join, getsize
-import sys
-
-import re
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+import os, re, time, sys
+import hashlib, bencode
 
 
-
-'''
-get_exist_byfile:
-    实现文件里的名称与txt库里比较,
-    得到已存在的list
-
-get_exist_bypath:
-   实现目录下的torrent文件与txt库里比较,
-    得到重复的torrrent list
-
-find_mv_from_store:
-    根据vid 查找
-     
-arrange_name功能:
-    实现wm番号的整理,
-    得到整理后的文件wm.txt
-
-'''
-
+from bs4 import BeautifulSoup
 
 
 reload(sys)
@@ -34,74 +13,76 @@ sys.setdefaultencoding('gbk')
 print sys.getdefaultencoding()
 
 
-#####for wm ############################################33
 
-def format_str(str):
-        #str = '100713_110-ipon-high'
-        split_str="_" 
+def parse_tor(file):
+    bt_path = {}
 
-        ls=str.split(split_str)
+    bt_file = open(file, 'rb')
+    bt_info = bencode.bdecode(bt_file.read()).get('info')
+    bt_info_hash_hex = hashlib.sha1(bencode.bencode(bt_info)).hexdigest()
+  
+    bt_file_size = bt_info.get('length')
+    bt_file_name = bt_info.get('name')
+    
+    bt_path[bt_file_name]=bt_file_size
 
-        date=ls[0]
-        year=date[4:]
-        md=date[0:4]
+    print bt_path 
 
-        new_str=year+md+split_str+"".join(ls[1:])
+    bt_file.close()
+ 
 
-        #print new_str
+def format_name(oriname):
+    print oriname 
+    mode=re.compile(r'\d+')
+    d=mode.findall(oriname)[0]
+    c=oriname.split(d)[0]
 
-        return new_str 
+    fmtname=c+d
+    print fmtname
+
+    return fmtname
+
+#计数
+#sequence的格式是list：[1,2,3,4...]
+def get_count1(sequence):
+    counts={}
+    for x in sequence:
+        if x in counts:
+            counts[x]+=1
+        else:
+            counts[x]=1
+    return counts
+
+#获取计数大于1的数据
+#sequence的格式是元组：(x,y)
+def get_dup_dic(sequence):
+    counts={}
+    for x,y,z in sequence:
+        if x in counts:
+            counts[x]+=1
+        else:
+            counts[x]=1
+            
+    kv_pairs=[(count,tz) for count,tz in counts.items() if tz>1]
+    return kv_pairs
+            
 
 
-def arrange_name(filelist):
-    arranged=[]
-
-    for old_name in filelist:
-        fn,ext=os.path.splitext(old_name)
-        new_name=format_str(fn)+ext
-
-        arranged.append((old_name,new_name))
-
-    print arranged
-   
-
-    dup_file=open("c:/wm.txt","w")
-    try:
-        for file in arranged:
-            ls=list(file) #touple转list
-
-            dup_file.write("\t".join(ls))
-
-            dup_file.write("\n")
-
-            #html_file.write('<br>')    
-    except Exception,e:
-        print e
-
-######end  for wm ###################
-
-
-
-def format_rule1(s):
-        rs=s.strip()
-        rs=rs.replace("-","")
-        rs=rs.replace(" ","")
-        rs=rs[0:7]
-        rs=rs.lower()
-        return rs
+#top 10
+def top_counts(dic_counts,n=10):
+    kv_pairs=[(count,tz) for count,tz in dic_counts.items()]
+    kv_pairs.sort()
+    return kv_pairs[-n:]
 
 
 def format_rule2(s):
-        
         rs=''
-        
         #匹配开头是数字,判断是非wm编号 
         wm=re.findall(r'^\d+',s)
      
         if len(wm)==1:  #是wm
             rs=s[0:10]
             return rs
-
 
         # 如:mide-267FHD_ok_0001.mp4
         #查找所有的非数字,['mide-', 'FHD_ok_', '.mp']
@@ -123,319 +104,205 @@ def format_rule2(s):
 
         rs=rs.replace("-","")
         rs=rs.replace(" ","")
+        rs=rs.replace("_","")
         rs=rs.lower()
         return rs
 
-
-
-def test_rule2(txtPath):
-     v_ids=[]
-
-     for f in os.listdir(txtPath):
-         txtf=open(txtPath+"/"+f)
-         for line in txtf.readlines():
-             p,v_id=os.path.split(line)
-             v_id=format_rule2(v_id)
-             #print v_id
-
-             v_ids.append((v_id,line))
-         txtf.close()
-
-     #print v_ids
-
-     rule_file=open("c:/work/rule_test.txt","w")
-     for ff,f in v_ids:
-        rule_file.write(f.strip()+'\t'+ff+'\n')
-    
-     rule_file.close()
-
-
-'''
-  格式 abp471   xxx     ssss
-'''
-
-def get_vids_by_text1(txtPath):
-     v_ids=[]
+  
+#for test                          
+def format_torrent(path):
+    for x in  os.listdir(path):
+        print format_rule2(x)
      
-     for f in os.listdir(txtPath):
-         txtf=open(txt_path+"/"+f)
-         for line in txtf.readlines():
-             v_id=line.split("\t")[0]
-             v_id=format_rule2(v_id)
-             #print v_id
-
-             v_ids.append(v_id)
-         txtf.close()
-
-     return v_ids
-
-
-'''
-  格式: F:\1111\avok\abp471_0001.avi
-'''
-def get_vids_by_text2(txtPath):
-     v_ids=[]
      
-     for f in os.listdir(txtPath):
-         txtf=open(txtPath+"/"+f)
-         for line in txtf.readlines():
-             p,v_id=os.path.split(line)
-             v_id=format_rule2(v_id)
-             #print v_id
+#r=1 表示同时搜索子目录
+def finddup2(path,r=0):
 
-             v_ids.append(v_id)
-         txtf.close()
-     return v_ids
-
-
-
-def find_mv_from_store(vid):
-    store_info=[] 
-    txtPath="c:/work/diskinfo/"
-    for f in os.listdir(txtPath):
-         txtf=open(txtPath+"/"+f)
-         for line in txtf.readlines():
-             p,v_id=os.path.split(line)
-
-             v_id=format_rule2(v_id)
-
-             store_info.append((v_id,f,line)) 
-    
-    flag=0 
-    for v in store_info:
-        v_id=v[0]
-
-        if v_id==vid:
-             
-            print "found movie, at {0} {1}".format(v[2].strip(),v[1])
-            flag=1
-            break
-
-    if flag==0:
-        print "Can't find movie!"
-         
-
-
-def check_exist_from_store(flist):
-    exist_vids=[]
-
-    txtPath="c:/work/diskinfo/"
-    v_ids=get_vids_by_text2(txtPath)
-
-     
-    for f in flist:
-        for v_id in v_ids:
+    files=[(format_rule2(x),x,path) for x in os.listdir(path) if not os.path.isdir(path+"\\"+x)]
             
-            ff=format_rule2(f)
-
-            if v_id==ff:
-                exist_vids.append((ff,f.strip()))
-                break
-
-
-    return exist_vids
-
-
-#参数为目录名:c:\torrent\
-def get_exist_bypath(path):
-    flist=[]
-
-    exist_list=[]
-
-    for f in os.listdir(path):
-        flist.append(f)
-
-    exist_list=check_exist_from_store(flist)
-
-    dup_file=open(torPath+"/dup.txt","w")
-    for ff,f in exist_list:
-        dup_file.write('move "'+f+'" c:/\n')
+    if r==1:
+        allfiles=walkpath(path)
+        files=[(format_rule2(x),x,p) for x,p in allfiles]
+   
+    #print files     #files的格式为
+    #[(u'030117_004', u'030117_004-FHD.torrent', u'd:\\new\\torrent'), (u'030317_038', u'030317_038.torrent', u'd:\\new\\torrent')]
+   
     
-    dup_file.close()
+    #for txtf in os.listdir(txtPath):
+    #     files=[line for line in open(txtPath+"/"+txtf)]
 
-    print duplicate_torrents
+    #获取计数大于1（即重复）的元素
+    dup_dic=get_dup_dic(files)
+    #print dic
+    
+    from collections import defaultdict
+    #元组转字典          
+    d=defaultdict(list)          
+    for k,v,p in files:
+        d[k].append((v,p))
+    
+    #print d
+    
+    savefile=path+"\\dup.txt"
+    
+    with open(savefile,"w") as fs: 
+        #获取重复的文件名
+        for it in dup_dic:
+            for x in d[it[0]]:
+                 #print x
+                 fs.write(x[0]+"\t"+x[1]+"\n")
+                 
+    print "save found dup file done!",savefile             
+    
+    
+def walkpath(path):
+   #files= [(dirpath,filenames) for dirpath,dirname,filenames in os.walk(path)]
+   files= []
+   for dirpath,dirname,filenames in os.walk(path.decode('utf-8')):
+       for filename in filenames:
+           files.append((filename,dirpath))
+       
+   return files  
 
 
-#参数为文件名:c:\test.txt
-def get_exist_byfile(txtfile):
-    flist=[]
+def walkfile(path):
+    
+    files=[x for x in os.listdir(path) if all([os.path.splitext(x)[1]=='.txt', not os.path.isdir(path+"\\"+x)])]
+    
+    # txtfile=[f for f in files if os.path.splitext(f)[1]=='.txt']
+    store=[]
+    for txtfile in files:
+        for line in open(path+"/"+txtfile):
+            p,f=os.path.split(line)
+            store.append((f.replace("\n",""),txtfile))
+            
+    return store  
+    
+#两个list对比核心功能，其他功能调用
+def comparelist(src,des):
+    #src: ["file"]    
+    #des:[("file","path")]
+    
+    from collections import defaultdict
 
-    exist_list=[]
+    dic=defaultdict(list)       
 
-    fp=open(txtfile)
-    for f in fp.readlines():
-        flist.append(f)
+    for x in src:
+        for a,b in des:
+            #print x,a,b
+            if format_rule2(x)==format_rule2(a):
+                 dic[x].append(os.path.join(b,a))       
 
-    exist_list=check_exist_from_store(flist)
+    return dic    
+    
+                        
+                 
+#对比torrent 库文件                 
+def cmp_tor_store(src_path):
+    #src=["a","b","c"]
+    #des=[("a","c:\\"),("b","c:\\"),("c","c:\\"),("a","d:\\"),("b","e:\\"),("c","e:\\"),("a","c:\\")]    
+   
+    src=[x for x in os.listdir(src_path) if not os.path.isdir(src_path+"\\"+x)]
+    
+    des=walkpath(TOR_STORE_PATH)
+   
+    found_dict=comparelist(src,des)     
+    
+    savefile=src_path+"\\tor_dup.txt"
+     
+    with open(savefile,"w") as fs:
+        for k,files in found_dict.items():
+             fs.write(k+"\n")
+             for f in files:
+                fs.write(f+"\n")
+                 
+    print savefile,"save complete!"    
+    
+                
+#对比txt 库文件                 
+def cmp_txt_store(src_path):
+    #src=["a","b","c"]
+    #des=[("a","c:\\"),("b","c:\\"),("c","c:\\"),("a","d:\\"),("b","e:\\"),("c","e:\\"),("a","c:\\")]    
+   
+    src=[x for x in os.listdir(src_path) if not os.path.isdir(src_path+"\\"+x)]
+    
+    des=walkfile(TXT_STORE_PATH)
+   
+    found_dict=comparelist(src,des)     
+    
+    savefile=src_path+"\\txt_dup.txt"
+    
+    with open(savefile,"w") as fs:
+        for k,files in found_dict.items():
+             fs.write(k+"\n")
+             for f in files:
+                fs.write(f+"\n")
+                 
+    print savefile,"save complete!"    
 
-    print exist_list
 
-    for ff,f in exist_list:
-        find_mv_from_store(ff)
+#把本地页面格式化后存为新文件
+def create_format_html(file):
+
+    html="" 
+    with open(file,"rb") as f:
+        html=f.read()
+
+    soup = BeautifulSoup(html,"html.parser")
+
+    title=soup.title.string.replace("/"," ").replace("?"," ")
+
+  
+    div=soup.find('div',id='video_title')
+    table=soup.find('table',id='video_jacket_info')
+
+    body=soup.body
+
+    body.clear()
+
+    body.append(div)
+    body.append(table)
+  
+    [s.extract() for s in soup.find_all('script')]
+    [s.extract() for s in soup.find_all('link')]
+    #[s.extract() for s in soup.find_all('meta')]
 
 
-# find store's duplicate file
-def findDup():
-        
-        #txtPath="c:/work/diskinfo/"
-        txtPath="c:/avstore/"
-        stores=[] 
-        d = {}
+    #print body
+    #print soup.prettify()
+    
+    with open("d:\\"+title+".html","w") as f:
+        try:
+            f.write(soup.prettify().encode('utf8'))
+        except Exception:
+            f.write(soup.prettify().encode('gbk'))
 
-        for txtf in os.listdir(txtPath):
-            for line in open(txtPath+"/"+txtf):
-                p,f=os.path.split(line)
+    print "new file created!"
 
-                ff=format_rule2(f)
 
-                stores.append((ff,f,p,txtf))    #记录文件的原始名和路径
+def create_htmls(path):
 
-                d[ff] = d.get(ff, 0) + 1 
-
-        dupId=[]  
-
-        for k, v in d.items():
-            if v > 1: 
-                dupId.append(k)
-
-        while '' in dupId:  #delete 空元素
-            dupId.remove('')
-
-        print "found %s record!"%len(dupId)
-
-        dupFiles=[]  
+    files= [x for x in  os.listdir(path) if not os.path.isdir(path+"\\"+x)]
  
-        for id in dupId:
-            #print "format %s ..."%id
-            for s in stores:
-                #('ABP-084\tABP-084 \xe5\xb0\x8b\xe5\xb8\xb8\xe3\x81\t2014-01-01\t', 'a-b.txt')
-                #now is : ('ABP084','ABP-084.avi','E:\MV\OK','a-b.txt')
-                v_id=s[0]
+    for file in files:
+        print "start handle ",file
+        create_format_html(path+"\\"+file)
 
-                #print "format %s to %s"%(id,s_id)
-
-                if v_id==id:
-                    #print "formated %s"%id
-                    dupFiles.append(s)
-
-
-        fd = open('c:/dup.txt', 'w')
-        for data in dupFiles:
-            #print data[0].strip()+"\t"+data[1]
-            fd.write(data[0].strip()+"\t"+data[1].strip()+"\t"+data[2].strip()+"\t"+data[3].strip()+"\n")
-       
-        fd.close()
-
-        print "....done! write in c:/dup.txt.."  
-
-
-def gen_move_dupfile_cmd():
-
-    # dup.txt格式：agemix-144.avi	201602.txt	F:\av2016
-
-    dup_file="c:/dup.txt"
-
-    cmd="" 
-    fd = open(dup_file)
-
-    #for line in os.listdir(dup_file):
-    for line in fd.readlines():
-         f=line.split("\t")[0]
-         fullpath=line.split("\t")[2].strip()
-         txtfile=line.split("\t")[1]
-         drv,path=os.path.splitdrive(fullpath)
-
-         target_file=f
-         if fullpath!="":
-             target_file=os.path.join(path[1:],f) #path[1:] 删除第一个字符'\'
-
-         cmd+='move "{0}" .'.format(target_file)+"\n"
-         
-    fd = open('c:/dup_move_cmd.txt', 'w')
-    fd.write(cmd)
-       
-    fd.close()
-
-    print "..gen cmd..done! write in c:/work/c:/work/dup_move_cmd.txt.."  
-
-
-
-def get_all_vid():
-        
-        txtPath="c:/work/diskinfo/"
-        stores=[] 
-    
-        for txtf in os.listdir(txtPath):
-            for line in open(txtPath+"/"+txtf):
-                p,f=os.path.split(line)
-  
-                ff=format_rule2(f)
-
-                stores.append((ff,f))
-
-
-        fd = open('c:/work/vids.txt', 'w')
-        for data in stores:
-            #print data[0].strip()+"\t"+data[1]
-            fd.write(data[0].strip()+"\t"+data[1])
-       
-        fd.close()
-
-        print "....done! write in c:/work/vids.txt.."  
-
-
-def search_vid(param):
-        
-        txtPath="c:/work/diskinfo/"
-        stores=[] 
-    
-        for txtf in os.listdir(txtPath):
-            for line in open(txtPath+"/"+txtf):
-                p,f=os.path.split(line)
-  
-                ff=format_rule2(f)
-
-                if ff.startswith(param):
-                    stores.append((ff,f))
-
-        print "find {0} count!".format(len(stores))
-        
-        raw_input()
-
-        print stores  
-
-
-
-
-
-
-
-##########################################################
 
 if __name__ == '__main__' :
+    TXT_STORE_PATH="d:\\new\\"
+    TOR_STORE_PATH="d:\\new\\torrent\\"
+    
     if len(sys.argv) ==2:
-        param= sys.argv[1]
+        path= sys.argv[1]
 
-        #get_exist_bypath(param)
-
-        #get_exist_byfile(param)
+        #walkfile("d:\\new\\")
+        #create_htmls(path)
+        #finddup2(d:\\new\\torrent\\")
+        #cmp_txt_store(path)
+        cmp_tor_store(path)
         
-        #findDup()
-
-        gen_move_dupfile_cmd()
-        
-        #find_phyfile_by_dup(param)
-
-        
-        #get_all_vid()
-        
-        #search_vid(param)
-
-        raw_input()
     else:
-        while True:
-            print "please input vid:"
-            vid=raw_input()
-            print vid
-            find_mv_from_store(vid)
-        #print "useage: avhandle.py PATH" 
+        #cmp_txt_store("d:\\new\\torrent")
+        #cmp_tor_store("d:\\new\\torrent")   
+        finddup2("d:\\new\\torrent",1)
