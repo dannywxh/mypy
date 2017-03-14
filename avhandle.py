@@ -241,8 +241,10 @@ def cmp_txt_store(src_path):
     print savefile,"save complete!"    
 
 
+
 #把本地页面格式化后存为新文件
-def create_format_html(file):
+#适用于jav的页面
+def create_html_format_l(file):
 
     html="" 
     with open(file,"rb") as f:
@@ -279,14 +281,56 @@ def create_format_html(file):
 
     print "new file created!"
 
+#把本地页面格式化后存为新文件
+#适用于cl的页面
+def create_html_format_2(file):
 
+    html="" 
+    with open(file,"rb") as f:
+        html=f.read()
+
+    soup = BeautifulSoup(html,"html.parser")
+
+    title=soup.title.string.replace("/"," ").replace("?"," ")
+
+    [s.extract() for s in soup.find_all('script')]
+    [s.extract() for s in soup.find_all('link')]
+    #[s.extract() for s in soup.find_all('meta')]
+    
+    div=soup.find('div',class_='tpc_content do_not_catch') #tpc_content do_not_catch
+        
+    a=div.find('a')
+    img=div.find('img')
+    
+    body=soup.body
+
+    body.clear()
+
+    body.append(div)
+    
+    a["href"]=a.get_text() #替换标签属性
+    del a['onmouseout']    #删除标签属性
+    del a['onmouseover']
+    
+    del img['onclick']
+    
+    
+    with open("d:\\"+title+".html","w") as f:
+        try:
+            f.write(soup.prettify().encode('utf8'))
+        except Exception:
+            f.write(soup.prettify().encode('gbk'))
+
+    print "new file created!"
+    
+    
 def create_htmls(path):
 
     files= [x for x in  os.listdir(path) if not os.path.isdir(path+"\\"+x)]
  
     for file in files:
         print "start handle ",file
-        create_format_html(path+"\\"+file)
+        create_html_format_2(path+"\\"+file)
 
 
 if __name__ == '__main__' :
@@ -305,4 +349,5 @@ if __name__ == '__main__' :
     else:
         #cmp_txt_store("d:\\new\\torrent")
         #cmp_tor_store("d:\\new\\torrent")   
-        finddup2("d:\\new\\torrent",1)
+        create_htmls("d:\\new\\cl")
+        #finddup2("d:\\new\\torrent",1)
