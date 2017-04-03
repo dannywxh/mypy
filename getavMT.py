@@ -37,6 +37,8 @@ class getUrlThread(threading.Thread):
         print "download from "+url+"\n"
         response = requests.get(url=self.url,headers=headers,timeout=5)    # 最基本的GET请求
 
+        print "status_code",response.status_code
+
         if response.ok:
             #print response.content
             #return StringIO.StringIO(response.content)
@@ -63,22 +65,26 @@ class downloadThread(threading.Thread):
            'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:22.0) Gecko/20100101 Firefox/22.0'}
 
         print "start download...",url
-        r=requests.get(url,headers=headers,stream=True)
+        r=requests.get(url,headers=headers,timeout=5,stream=True)
+
+        print "status-code:",r.status_code
+
         filename=url.split('/')[-1].strip().replace("?","")
-        
         #filename+=str(random.random());
         
-
-        with open(filename,'wb')as f:
-            for chunk in r.iter_content(chunk_size=1024):
-                if chunk:
-                    f.write(chunk)
-                    f.flush()
-            print filename,"download ok!"
+        try:
+            with open(filename,'wb')as f:
+                for chunk in r.iter_content(chunk_size=1024):
+                    if chunk:
+                        f.write(chunk)
+                        f.flush()
+                print filename,"download ok!"
+        except Exception,e:
+            print e.message
 
 
     def run(self):
-        #time.sleep(3)  #休眠5s一下，否则太快取不到queue的数据就结束了
+        time.sleep(1)  #休眠1s一下
         while True:
             if not self.queue_url.empty():
                 url=self.queue_url.get()
@@ -156,7 +162,7 @@ class parseThread(threading.Thread):
         for td in tds:
             a=td.find('a')
             #res.append((a.string,a['href']))
-            res.append((a.get_text(),"http://cl.o3c.me/"+a['href']))
+            res.append((a.get_text(),a['href']))
 
         #print res
         return res
@@ -414,7 +420,7 @@ def down_cl_remainder(all_txt,downed_path):
 
     #开启下载文件线程 
     
-    dts=[downloadThread(i,q_urls) for i in xrange(1,5)]
+    dts=[downloadThread(i,q_urls) for i in xrange(1,3)]
 
     for t in dts:
         t.start()
@@ -513,9 +519,10 @@ def cmp_cl_store(store_path,src):
     
     if len(diff)==0:
         print "no found diff!"
-        return
+        return 
   
-    savefile=store_path+"\\cl_"+ str(random.randint(10,100))+".txt"  
+    sdate=time.strftime('%Y-%m-%d',time.localtime(time.time()))
+    savefile=store_path+"\\cl_"+sdate+ str(random.randint(10,100))+".txt"  
     with open(savefile,"w") as fs:
         for name,url in diff:
              fs.write(name.encode("utf-8")+"\t"+url.encode("utf-8")+"\n")
@@ -526,27 +533,34 @@ def cmp_cl_store(store_path,src):
 
 
 #下载cl库里不存在的部分
-def down_cl_diff(cl_store_path):
+def down_store_diff(type):
     
     q=Queue.Queue()
     q_urls=Queue.Queue()
     
     urls=[]
 
+    if type=='jav': 
+        url="http://www.jav11b.com/cn/vl_update.php?&mode=&page="
+        url_detail="http://www.jav11b.com/cn/"
+        store_path="D:\\avstore\\jav_store\\"
+    elif type=='cl':
+        url="http://cl.o3c.me/thread0806.php?fid=15&search=&page="
+        url_detail="http://cl.o3c.me/"
+        store_path="D:\\avstore\\CL_STORE\\"
+
     #url="http://www.btbtt.co/forum-index-fid-1183-typeid1-8-typeid2-0-typeid3-0-typeid4-0-page-19.htm"
-    #url="http://cl.o3c.me/thread0806.php?fid=15&search=&page="
-    url="http://www.jav11b.com/cn/vl_update.php?&mode=&page="
 
-    uts=[getUrlThread(url+str(i),i,q) for i in xrange(1,3)]
+    uts=[getUrlThread(url+str(i),i,q) for i in xrange(1,10)]
     
-    pt=parseThread(q,urls)
-
     for t in uts:
         t.start()
 
+    pt=parseThread(q,urls,type)
+
     pt.start()
 
-    #!等待geturl Thread 完成
+    #等待geturl Thread 完成
     for t in uts:
         t.join()
 
@@ -559,18 +573,17 @@ def down_cl_diff(cl_store_path):
 
     print "For down urls=",len(urls)
 
-    diff=cmp_cl_store(cl_store_path,urls)
+    diff=cmp_cl_store(store_path,urls)
 
     if len(diff)>0: 
         for name,url in diff:
-            #q_urls.put("http://cl.o3c.me/htm_data/15/1703/"+url)
-            q_urls.put("http://www.jav11b.com/cn/"+url)
+            q_urls.put(url_detail+url)
 
         print "q_urls size:",q_urls.qsize()
 
         #开启下载文件线程 
         
-        dts=[downloadThread(i,q_urls) for i in xrange(1,5)]
+        dts=[downloadThread(i,q_urls) for i in xrange(1,3)]
 
         for t in dts:
             t.start()
@@ -590,10 +603,12 @@ if __name__ == '__main__' :
     #down_btbt()
     #down_cl()
     #down_cl_detail()
-    #down_cl_remainder("c:\\cl.txt","C:\\script\\cl2")
-    #STORE_PATH="D:\\avstore\\CL_STORE\\"
-    STORE_PATH="D:\\avstore\\jav_store\\"
 
-    down_cl_diff(STORE_PATH)
+    #down_store_diff("cl")
+    #down_store_diff("jav")
+
+    down_cl_remainder("d:\\cl.txt","d:\\dd")
+
+
 
 

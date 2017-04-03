@@ -212,9 +212,9 @@ def cmp_tor_store(src_path):
      
     with open(savefile,"w") as fs:
         for k,files in found_dict.items():
-             fs.write(k+"\n")
+             fs.write('move "{0}" c:\\\n'.format(k))
              for f in files:
-                fs.write(f+"\n")
+                 fs.write('rem "{0}" \n'.format(f))
                  
     print savefile,"save complete!"    
     
@@ -234,9 +234,9 @@ def cmp_txt_store(src_path):
     
     with open(savefile,"w") as fs:
         for k,files in found_dict.items():
-             fs.write(k+"\n")
+             fs.write('move "{0}" c:\\\n'.format(k))
              for f in files:
-                fs.write(f+"\n")
+                fs.write('rem "{0}" \n'.format(f))
                  
     print savefile,"save complete!"    
 
@@ -334,8 +334,8 @@ def create_htmls(path):
 
 
 if __name__ == '__main__' :
-    TXT_STORE_PATH="d:\\new\\"
-    TOR_STORE_PATH="d:\\new\\torrent\\"
+    TXT_STORE_PATH="d:\\avstore\\"
+    TOR_STORE_PATH="d:\\torrents\\"
     
     if len(sys.argv) ==2:
         path= sys.argv[1]
@@ -347,7 +347,7 @@ if __name__ == '__main__' :
         cmp_tor_store(path)
         
     else:
-        #cmp_txt_store("d:\\new\\torrent")
-        #cmp_tor_store("d:\\new\\torrent")   
-        create_htmls("d:\\new\\cl")
+        #cmp_txt_store("c:\\torrent")
+        cmp_tor_store("c:\\torrent")   
+        #create_htmls("d:\\new\\cl")
         #finddup2("d:\\new\\torrent",1)
