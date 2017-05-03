@@ -7,12 +7,14 @@ import threading
 import Queue
 import StringIO
 
+import common
+
 from bs4 import BeautifulSoup
 
 
 reload(sys)
 #print sys.getdefaultencoding()
-sys.setdefaultencoding('gbk')
+sys.setdefaultencoding('utf-8')
 print sys.getdefaultencoding()
 
 
@@ -37,10 +39,10 @@ class getUrlThread(threading.Thread):
         print "download from "+url+"\n"
         response = requests.get(url=self.url,headers=headers,timeout=5)    # 最基本的GET请求
 
-        print "status_code",response.status_code
+        #print "status_code",response.status_code
 
         if response.ok:
-            #print response.content
+            #print response.content.encode("gbk")
             #return StringIO.StringIO(response.content)
             return response.content
 
@@ -118,6 +120,44 @@ class parseThread(threading.Thread):
 
         #print res
         return res
+
+    def parseHTML_jav_detail(self,data):
+        soup = BeautifulSoup(data,"html.parser")
+
+        title=soup.title.string
+        
+        try:
+            div=soup.find('div',{"id":'video_info'})
+            div_cast=div.find('div',{"id":'video_cast'})
+            a=div_cast.find('a');
+            vcast=a.string
+        except:
+            print "vcast not found!"
+            vcast=""
+        
+        try:
+            div=soup.find('div',{"id":'video_date'})
+            td_date=div.find('td',class_="text")
+            vdate=td_date.string
+        except:
+            print "vdate not found!"
+            vdate=""   
+
+        try:
+            div=soup.find('div',{"id":'video_review'})
+            span=div.find('span',class_="score") 
+            score=span.string
+        except:
+            print "score not found!"
+            score=""
+
+        try:
+            #print title,cast,vdate,score
+            return u'%s\t%s\t%s\t%s'%(title,vcast,vdate,score)
+            #return title+"\t"+cast+"\t"+vdate+"\t"+score
+        except:
+            print "encode error!"
+        return "error"
 
 
     def parseHTML2(self,data):
@@ -207,10 +247,16 @@ class parseThread(threading.Thread):
                 break
             if data:
                 if self.type=='jav':
+                    print "parse by jav!\n"
                     res=self.parseHTML(data)
                     for x,y,z in res:
                          self.out_list.append((x,y))
+                elif self.type=='jav_detail':
+                    #print "parse by jav_detail\n"
+                    x=self.parseHTML_jav_detail(data)
+                    self.out_list.append(x)
                 elif self.type=='cl':
+                    print "parse by cl!\n"
                     res=self.parseHTML_cl(data)
                     for x,y in res:
                          self.out_list.append((x,y))
@@ -594,11 +640,108 @@ def down_store_diff(type):
         print "Diff files download complete!"
         
     
+#应该使用线程池
+def search_jav(val):
+    q=Queue.Queue()  #存放requests获取的html data：self.queue.put((self.sid,data))
+    
+    out_urls=[] #存放解析好的结果
 
+    url ="http://www.j12lib.com/cn/vl_searchbyid.php?keyword="+val
+
+    ut=getUrlThread(url,1,q)  #输出q
+
+    pt=parseThread(q,out_urls,'jav_detail') #输入q,输出out_urls
+
+    #for t in uts:
+    ut.start()
+
+    pt.start()
+
+    #!等待geturl Thread 完成
+    ut.join()
+
+    #通知pt退出
+    q.put((-1,None))
+
+    #!等待parse Thread 完成    
+    pt.join()
+    
+    #print "size of urls:",len(out_urls)
+
+    return out_urls
+'''
+    urlfile="d:\\javurls.txt"                 
+    with open(urlfile,"w") as f:
+         for x in  out_urls:
+             f.write(x+"\n")      
+
+    print "File saved!",urlfile
+'''
+
+#应该使用线程池
+def search_jav(slist):
+
+    q=Queue.Queue()  #存放requests获取的html data：self.queue.put((self.sid,data))
+    
+    out=[] #存放解析好的结果
+    url ="http://www.j12lib.com/cn/vl_searchbyid.php?keyword="
+    uts=[]
+
+    allinfo=[] 
+    for i in range(len(slist)):
+        print "------Add %s\n"%(url+slist[i])
+        print "------Allinfo count %s\n"%(len(allinfo))
+        uts.append(getUrlThread(url+slist[i],i,q))  #输出q
+        out=[]
+        if i%10==0:
+            print "get start %s\n"%(i)
+            pt=parseThread(q,out,'jav_detail') #输入q,输出out_urls
+
+            for ut in uts:
+                ut.start()
+
+            pt.start()
+
+            #!等待geturl Thread 完成
+            ut.join()
+
+            #通知pt退出
+            q.put((-1,None))
+
+            #!等待parse Thread 完成    
+            pt.join()
+            uts=[]
+            allinfo+=out
+
+
+    urlfile="d:\\javurls.txt"                 
+    with open(urlfile,"w") as f:
+         for x in  allinfo:
+             f.write(x+"\n")      
+
+    print "File saved!",urlfile
+                           
+
+def walkfile(path):
+    
+    files=[x for x in os.listdir(path) if all([os.path.splitext(x)[1]=='.txt', not os.path.isdir(path+"\\"+x)])]
+    
+    # txtfile=[f for f in files if os.path.splitext(f)[1]=='.txt']
+    store=[]
+    for txtfile in files:
+        for line in open(path+"/"+txtfile):
+            p,f=os.path.split(line)
+            vid=common.format_rule2(f.replace("\n",""))
+
+            wm=re.findall(r'^\d+',vid)
+            if len(wm)==0:  #不是wm
+                store.append(vid)
+    
+    return store  
 
 
 if __name__ == '__main__' :
-    
+    TXT_STORE_PATH="d:\\avstore\\"
     #down_jav()
     #down_btbt()
     #down_cl()
@@ -607,8 +750,15 @@ if __name__ == '__main__' :
     #down_store_diff("cl")
     #down_store_diff("jav")
 
-    down_cl_remainder("d:\\cl.txt","d:\\dd")
+    #down_cl_remainder("d:\\cl.txt","d:\\dd")
 
+    st=walkfile(TXT_STORE_PATH)
+    search_jav(st)
 
+'''
+    urlfile="d:\\javurls.txt"                 
+    with open(urlfile,"w") as f:
+         for x in  out_urls:
+             f.write(x+"\n")      
 
-
+'''

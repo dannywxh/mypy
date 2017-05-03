@@ -2,14 +2,14 @@
 # -*- coding: utf-8 -*-
 import os, re, time, sys
 import hashlib, bencode
-
+import common
 
 from bs4 import BeautifulSoup
 
 
 reload(sys)
 #print sys.getdefaultencoding()
-sys.setdefaultencoding('gbk')
+sys.setdefaultencoding('utf-8')
 print sys.getdefaultencoding()
 
 
@@ -42,8 +42,8 @@ def format_name(oriname):
 
     return fmtname
 
-#¼ÆÊı
-#sequenceµÄ¸ñÊ½ÊÇlist£º[1,2,3,4...]
+#è®¡æ•°
+#sequenceçš„æ ¼å¼æ˜¯listï¼š[1,2,3,4...]
 def get_count1(sequence):
     counts={}
     for x in sequence:
@@ -53,8 +53,8 @@ def get_count1(sequence):
             counts[x]=1
     return counts
 
-#»ñÈ¡¼ÆÊı´óÓÚ1µÄÊı¾İ
-#sequenceµÄ¸ñÊ½ÊÇÔª×é£º(x,y)
+#è·å–è®¡æ•°å¤§äº1çš„æ•°æ®
+#sequenceçš„æ ¼å¼æ˜¯å…ƒç»„ï¼š(x,y)
 def get_dup_dic(sequence):
     counts={}
     for x,y,z in sequence:
@@ -77,23 +77,23 @@ def top_counts(dic_counts,n=10):
 
 def format_rule2(s):
         rs=''
-        #Æ¥Åä¿ªÍ·ÊÇÊı×Ö,ÅĞ¶ÏÊÇ·Çwm±àºÅ 
+        #åŒ¹é…å¼€å¤´æ˜¯æ•°å­—,åˆ¤æ–­æ˜¯éwmç¼–å· 
         wm=re.findall(r'^\d+',s)
      
-        if len(wm)==1:  #ÊÇwm
+        if len(wm)==1:  #æ˜¯wm
             rs=s[0:10]
             return rs
 
-        # Èç:mide-267FHD_ok_0001.mp4
-        #²éÕÒËùÓĞµÄ·ÇÊı×Ö,['mide-', 'FHD_ok_', '.mp']
-        #µÚÒ»¸öÔªËØ¾ÍÊÇ"mide-"
+        # å¦‚:mide-267FHD_ok_0001.mp4
+        #æŸ¥æ‰¾æ‰€æœ‰çš„éæ•°å­—,['mide-', 'FHD_ok_', '.mp']
+        #ç¬¬ä¸€ä¸ªå…ƒç´ å°±æ˜¯"mide-"
         alpha_list=re.findall(r'\D+', s)
         
         if len(alpha_list)>0: 
             rs+=alpha_list[0]
 
-        #²éÕÒËùÓĞµÄÊı×Ö,['267', '0001', '4']
-        #µÚÒ»¸öÔªËØ¾ÍÊÇ"267"
+        #æŸ¥æ‰¾æ‰€æœ‰çš„æ•°å­—,['267', '0001', '4']
+        #ç¬¬ä¸€ä¸ªå…ƒç´ å°±æ˜¯"267"
         num_list=re.findall(r'\d+', s)
 
         if len(num_list)>0:
@@ -115,7 +115,7 @@ def format_torrent(path):
         print format_rule2(x)
      
      
-#r=1 ±íÊ¾Í¬Ê±ËÑË÷×ÓÄ¿Â¼
+#r=1 è¡¨ç¤ºåŒæ—¶æœç´¢å­ç›®å½•
 def finddup2(path,r=0):
 
     files=[(format_rule2(x),x,path) for x in os.listdir(path) if not os.path.isdir(path+"\\"+x)]
@@ -124,19 +124,19 @@ def finddup2(path,r=0):
         allfiles=walkpath(path)
         files=[(format_rule2(x),x,p) for x,p in allfiles]
    
-    #print files     #filesµÄ¸ñÊ½Îª
+    #print files     #filesçš„æ ¼å¼ä¸º
     #[(u'030117_004', u'030117_004-FHD.torrent', u'd:\\new\\torrent'), (u'030317_038', u'030317_038.torrent', u'd:\\new\\torrent')]
    
     
     #for txtf in os.listdir(txtPath):
     #     files=[line for line in open(txtPath+"/"+txtf)]
 
-    #»ñÈ¡¼ÆÊı´óÓÚ1£¨¼´ÖØ¸´£©µÄÔªËØ
+    #è·å–è®¡æ•°å¤§äº1ï¼ˆå³é‡å¤ï¼‰çš„å…ƒç´ 
     dup_dic=get_dup_dic(files)
     #print dic
     
     from collections import defaultdict
-    #Ôª×é×ª×Öµä          
+    #å…ƒç»„è½¬å­—å…¸          
     d=defaultdict(list)          
     for k,v,p in files:
         d[k].append((v,p))
@@ -146,7 +146,7 @@ def finddup2(path,r=0):
     savefile=path+"\\dup.txt"
     
     with open(savefile,"w") as fs: 
-        #»ñÈ¡ÖØ¸´µÄÎÄ¼şÃû
+        #è·å–é‡å¤çš„æ–‡ä»¶å
         for it in dup_dic:
             for x in d[it[0]]:
                  #print x
@@ -174,11 +174,32 @@ def walkfile(path):
     for txtfile in files:
         for line in open(path+"/"+txtfile):
             p,f=os.path.split(line)
-            store.append((f.replace("\n",""),txtfile))
+            store.append((common.format_rule2(f),f.replace("\n","").encode('utf-8'),txtfile))
+            #store.append((format_rule2(f),f.replace("\n","").decode("unicode_escape"),txtfile))            
+
+    return store  
+
+
+def walkfile1(path):
+    
+    files=[x for x in os.listdir(path) if all([os.path.splitext(x)[1]=='.txt', not os.path.isdir(path+"\\"+x)])]
+    
+    # txtfile=[f for f in files if os.path.splitext(f)[1]=='.txt']
+    store=[]
+    for txtfile in files:
+        for line in open(path+"/"+txtfile):
             
+            vid,cast,vdate,score=line.split("\t")
+            if u"è¯†åˆ«ç æœå¯»ç»“æœ" in vid:
+                print vid.encode("gbk")
+            else:
+                store.append((common.format_rule2(vid),vid,cast,vdate,score.replace("\n","")))
+            #store.append((format_rule2(vid.encode("utf8")),vid.encode('utf-8'),url))
+            #store.append((format_rule2(f),f.replace("\n","").decode("unicode_escape"),txtfile))            
+
     return store  
     
-#Á½¸ölist¶Ô±ÈºËĞÄ¹¦ÄÜ£¬ÆäËû¹¦ÄÜµ÷ÓÃ
+#ä¸¤ä¸ªlistå¯¹æ¯”æ ¸å¿ƒåŠŸèƒ½ï¼Œå…¶ä»–åŠŸèƒ½è°ƒç”¨
 def comparelist(src,des):
     #src: ["file"]    
     #des:[("file","path")]
@@ -197,7 +218,7 @@ def comparelist(src,des):
     
                         
                  
-#¶Ô±Ètorrent ¿âÎÄ¼ş                 
+#å¯¹æ¯”torrent åº“æ–‡ä»¶                 
 def cmp_tor_store(src_path):
     #src=["a","b","c"]
     #des=[("a","c:\\"),("b","c:\\"),("c","c:\\"),("a","d:\\"),("b","e:\\"),("c","e:\\"),("a","c:\\")]    
@@ -219,7 +240,7 @@ def cmp_tor_store(src_path):
     print savefile,"save complete!"    
     
                 
-#¶Ô±Ètxt ¿âÎÄ¼ş                 
+#å¯¹æ¯”txt åº“æ–‡ä»¶                 
 def cmp_txt_store(src_path):
     #src=["a","b","c"]
     #des=[("a","c:\\"),("b","c:\\"),("c","c:\\"),("a","d:\\"),("b","e:\\"),("c","e:\\"),("a","c:\\")]    
@@ -242,96 +263,189 @@ def cmp_txt_store(src_path):
 
 
 
-#°Ñ±¾µØÒ³Ãæ¸ñÊ½»¯ºó´æÎªĞÂÎÄ¼ş
-#ÊÊÓÃÓÚjavµÄÒ³Ãæ
-def create_html_format_l(file):
+#æŠŠæœ¬åœ°é¡µé¢æ ¼å¼åŒ–åå­˜ä¸ºæ–°æ–‡ä»¶
+#é€‚ç”¨äºjavçš„é¡µé¢
+def create_html_format_l(path,file):
 
     html="" 
-    with open(file,"rb") as f:
+    with open(path+"\\"+file,"rb") as f:
         html=f.read()
 
     soup = BeautifulSoup(html,"html.parser")
 
     title=soup.title.string.replace("/"," ").replace("?"," ")
 
-  
-    div=soup.find('div',id='video_title')
-    table=soup.find('table',id='video_jacket_info')
 
-    body=soup.body
+    try:  
+        div=soup.find('div',id='video_title')
+        table=soup.find('table',id='video_jacket_info')
 
-    body.clear()
+        body=soup.body
 
-    body.append(div)
-    body.append(table)
-  
-    [s.extract() for s in soup.find_all('script')]
-    [s.extract() for s in soup.find_all('link')]
-    #[s.extract() for s in soup.find_all('meta')]
+        body.clear()
 
-
-    #print body
-    #print soup.prettify()
-    
-    with open("d:\\"+title+".html","w") as f:
-        try:
-            f.write(soup.prettify().encode('utf8'))
-        except Exception:
-            f.write(soup.prettify().encode('gbk'))
-
-    print "new file created!"
-
-#°Ñ±¾µØÒ³Ãæ¸ñÊ½»¯ºó´æÎªĞÂÎÄ¼ş
-#ÊÊÓÃÓÚclµÄÒ³Ãæ
-def create_html_format_2(file):
-
-    html="" 
-    with open(file,"rb") as f:
-        html=f.read()
-
-    soup = BeautifulSoup(html,"html.parser")
-
-    title=soup.title.string.replace("/"," ").replace("?"," ")
-
-    [s.extract() for s in soup.find_all('script')]
-    [s.extract() for s in soup.find_all('link')]
-    #[s.extract() for s in soup.find_all('meta')]
-    
-    div=soup.find('div',class_='tpc_content do_not_catch') #tpc_content do_not_catch
+        body.append(div)
+        body.append(table)
+      
+        [s.extract() for s in soup.find_all('script')]
+        [s.extract() for s in soup.find_all('link')]
+        #[s.extract() for s in soup.find_all('meta')]
         
-    a=div.find('a')
-    img=div.find('img')
-    
-    body=soup.body
+        with open(path+"\\new"+title+".html","w") as f:
+             f.write(soup.prettify().encode('utf8'))
 
-    body.clear()
+        print "new file created!"
+        return ""
+    except Exception,e:
+        print e.message
+        return file
 
-    body.append(div)
-    
-    a["href"]=a.get_text() #Ìæ»»±êÇ©ÊôĞÔ
-    del a['onmouseout']    #É¾³ı±êÇ©ÊôĞÔ
-    del a['onmouseover']
-    
-    del img['onclick']
-    
-    
-    with open("d:\\"+title+".html","w") as f:
-        try:
-            f.write(soup.prettify().encode('utf8'))
-        except Exception:
-            f.write(soup.prettify().encode('gbk'))
 
-    print "new file created!"
-    
+
+#æŠŠæœ¬åœ°é¡µé¢æ ¼å¼åŒ–åå­˜ä¸ºæ–°æ–‡ä»¶
+#é€‚ç”¨äºclçš„é¡µé¢
+def create_html_format_2(path,file):
+
+    html="" 
+    with open(path+"\\"+file,"rb") as f:
+        html=f.read()
+
+    print html
+    soup = BeautifulSoup(html,"html.parser")
+
+    title=soup.title.string.replace("/"," ").replace("?"," ")
+
+    try:
+        
+        [s.extract() for s in soup.find_all('script')]
+        [s.extract() for s in soup.find_all('link')]
+        #[s.extract() for s in soup.find_all('meta')]
+
+        div=soup.find('div',class_='tpc_content do_not_catch') #tpc_content do_not_catch
+         
+        print div
+
+        a=div.find('a')
+        img=div.find('img')
+        
+        a["href"]=a.get_text() #æ›¿æ¢æ ‡ç­¾å±æ€§
+        del a['onmouseout']    #åˆ é™¤æ ‡ç­¾å±æ€§
+        del a['onmouseover']
+        del img['onclick']
+
+        body=soup.body
+
+        body.clear()
+
+        body.append(div)
+
+        with open(path+"\\new\\"+title+".html","w") as f:
+            try:
+                f.write(soup.prettify().encode('utf8'))
+            except Exception:
+                f.write(soup.prettify().encode('gbk'))
+        
+        print "new file created!"
+        return ""
+
+    except Exception,e:
+        print e.message
+        return file
+
+   
     
 def create_htmls(path):
 
-    files= [x for x in  os.listdir(path) if not os.path.isdir(path+"\\"+x)]
+    files=[x for x in os.listdir(path) if all([os.path.splitext(x)[1]=='.html', not os.path.isdir(path+"\\"+x)])]
  
+    if not os.path.exists(path+"//new"):
+        os.chdir(path)
+        os.mkdir("new")
+     
+    errors=[]
     for file in files:
         print "start handle ",file
-        create_html_format_2(path+"\\"+file)
+        ret=create_html_format_2(path,file)
 
+        if ret!='':
+           errors.append(ret)  
+
+    with open(path+"\\error.txt","w") as f:
+        for err in errors:
+            f.write(err+"\n")
+
+    print errors 
+       
+
+
+def parseHTML_jav_detail(data):
+    soup = BeautifulSoup(data,"html.parser")
+
+    title=soup.title.string.strip()
+    try:
+        print title
+    except:
+        print title.encode('utf-8')
+    
+    try:
+        div=soup.find('div',{"id":'video_info'})
+        div_cast=div.find('div',{"id":'video_cast'})
+        a=div_cast.find('a');
+        vcast=a.string.strip()
+    except:
+        #print "vcast not found!"
+        vcast=""
+    
+    try:
+        div=soup.find('div',{"id":'video_date'})
+        td_date=div.find('td',class_="text")
+        vdate=td_date.string.strip()
+    except:
+        #print "vdate not found!"
+        vdate=""   
+
+    try:
+        div=soup.find('div',{"id":'video_review'})
+        span=div.find('span',class_="score") 
+        score=span.string.strip()
+    except:
+        #print "score not found!"
+        score=""
+
+    try:
+        #print title,cast,vdate,score
+        return u'%s\t%s\t%s\t%s'%(title,vcast,vdate,score)
+        #return title+"\t"+cast+"\t"+vdate+"\t"+score
+    except:
+        print "encode error!"
+        return "error"
+
+
+def arrange_txt():
+    path="D:\\avstore\\jav-2\\"
+    files=[x for x in os.listdir(path.decode("utf-8")) if not os.path.isdir(path.decode("utf-8")+"\\"+x)]
+
+    perror=[] 
+    out=[] 
+
+    for f in files:
+        data=open(path.decode("utf-8")+f,'r').read()
+        ret=parseHTML_jav_detail(data)
+        if ret=="error":
+            perror.append(f)
+        else:
+            out.append(ret)
+
+
+    with open(path+"\\out.txt","w") as fo:
+        for msg in out:
+            fo.write(msg+"\n")
+    print "out file created!"    
+
+    with open(path+"\\err.txt","w") as fo:
+         for err in perror:
+            fo.write('move "'+err+'" tmp\\'+'\n')
+    print "err file created!"
 
 if __name__ == '__main__' :
     TXT_STORE_PATH="d:\\avstore\\"
@@ -348,6 +462,8 @@ if __name__ == '__main__' :
         
     else:
         #cmp_txt_store("c:\\torrent")
-        cmp_tor_store("c:\\torrent")   
-        #create_htmls("d:\\new\\cl")
+        #cmp_tor_store("c:\\torrent")   
+        #create_htmls("d:\\dd")
         #finddup2("d:\\new\\torrent",1)
+
+        arrange_txt()

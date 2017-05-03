@@ -1,0 +1,19 @@
+<!doctype html>
+<title>Hello from Flask</title>
+
+<table >
+<th>name</th>
+<th>score</th>
+<th>pic</th>
+
+<tbody>
+ {% for i in info %} 
+     <tr>
+         <td> {{ i['name'] }}</td>
+         <td> {{ i['score'] }}</td>
+		 <td> <img src="{{ url_for('static', filename='images/1.jpg') }}" > </td>
+    </tr>
+{% endfor %}
+</tbody>
+</table>
+
