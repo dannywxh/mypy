@@ -2,14 +2,14 @@
 # -*- coding: utf-8 -*-
 import os, re, time, sys
 import hashlib, bencode
-
+import requests
 
 from bs4 import BeautifulSoup
 
 
 reload(sys)
 #print sys.getdefaultencoding()
-sys.setdefaultencoding('utf-8')
+#sys.setdefaultencoding('utf-8')
 print sys.getdefaultencoding()
 
 
@@ -34,23 +34,23 @@ def parse_tor(file):
 
 def format_rule2(s):
         rs=''
-        #Æ¥Åä¿ªÍ·ÊÇÊý×Ö,ÅÐ¶ÏÊÇ·Çwm±àºÅ 
+        #Æ¥ï¿½ä¿ªÍ·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½,ï¿½Ð¶ï¿½ï¿½Ç·ï¿½wmï¿½ï¿½ï¿½ 
         wm=re.findall(r'^\d+',s)
      
-        if len(wm)==1:  #ÊÇwm
+        if len(wm)==1:  #ï¿½ï¿½wm
             rs=s[0:10]
             return rs
 
-        # Èç:mide-267FHD_ok_0001.mp4
-        #²éÕÒËùÓÐµÄ·ÇÊý×Ö,['mide-', 'FHD_ok_', '.mp']
-        #µÚÒ»¸öÔªËØ¾ÍÊÇ"mide-"
+        # ï¿½ï¿½:mide-267FHD_ok_0001.mp4
+        #ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ÐµÄ·ï¿½ï¿½ï¿½ï¿½ï¿½,['mide-', 'FHD_ok_', '.mp']
+        #ï¿½ï¿½Ò»ï¿½ï¿½Ôªï¿½Ø¾ï¿½ï¿½ï¿½"mide-"
         alpha_list=re.findall(r'\D+', s)
         
         if len(alpha_list)>0: 
             rs+=alpha_list[0]
 
-        #²éÕÒËùÓÐµÄÊý×Ö,['267', '0001', '4']
-        #µÚÒ»¸öÔªËØ¾ÍÊÇ"267"
+        #ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ðµï¿½ï¿½ï¿½ï¿½ï¿½,['267', '0001', '4']
+        #ï¿½ï¿½Ò»ï¿½ï¿½Ôªï¿½Ø¾ï¿½ï¿½ï¿½"267"
         num_list=re.findall(r'\d+', s)
 
         if len(num_list)>0:
@@ -73,13 +73,13 @@ def format_torrent(path):
      
     
 def walkpath(path):
-   #files= [(dirpath,filenames) for dirpath,dirname,filenames in os.walk(path)]
-   files= []
-   for dirpath,dirname,filenames in os.walk(path.decode('utf-8')):
-       for filename in filenames:
-           files.append((filename,dirpath))
+    #files= [(dirpath,filenames) for dirpath,dirname,filenames in os.walk(path)]
+    files= []
+    for dirpath,dirname,filenames in os.walk(path.decode('utf-8')):
+        for filename in filenames:
+            files.append((filename,dirpath))
        
-   return files  
+    return files  
 
 
 def walkfile(path):
@@ -95,7 +95,7 @@ def walkfile(path):
             
     return store  
     
-#Á½¸ölist¶Ô±ÈºËÐÄ¹¦ÄÜ£¬ÆäËû¹¦ÄÜµ÷ÓÃ
+#ï¿½ï¿½ï¿½ï¿½listï¿½Ô±Èºï¿½ï¿½Ä¹ï¿½ï¿½Ü£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Üµï¿½ï¿½ï¿½
 def comparelist(src,des):
     #src: ["file"]    
     #des:[("file","path")]
@@ -108,9 +108,27 @@ def comparelist(src,des):
         for a,b in des:
             #print x,a,b
             if format_rule2(x)==format_rule2(a):
-                 dic[x].append(os.path.join(b,a))       
+                dic[x].append(os.path.join(b,a))       
 
     return dic    
     
-                        
+
+def download(url):
+
+    headers = {'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+       'Accept-Encoding': 'gzip, deflate, compress',
+       'Accept-Language': 'en-us;q=0.5,en;q=0.3',
+       'Cache-Control': 'max-age=0',
+       'Connection': 'keep-alive',
+       'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:22.0) Gecko/20100101 Firefox/22.0'}
+
+    print "download from "+url+"\n"
+    try:
+        response = requests.get(url=url,headers=headers,timeout=5)    # æœ€åŸºæœ¬çš„GETè¯·æ±‚
+        return response
+    except Exception,e:
+        print e
+    #print "status_code",response.status_code
+    
+                       
                  

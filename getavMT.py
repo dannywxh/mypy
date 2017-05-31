@@ -6,11 +6,9 @@ import requests
 import threading
 import Queue
 import StringIO
-
-import common
-
 from bs4 import BeautifulSoup
 
+import common
 
 reload(sys)
 #print sys.getdefaultencoding()
@@ -37,7 +35,7 @@ class getUrlThread(threading.Thread):
            'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:22.0) Gecko/20100101 Firefox/22.0'}
 
         print "download from "+url+"\n"
-        response = requests.get(url=self.url,headers=headers,timeout=5)    # ×î»ù±¾µÄGETÇëÇó
+        response = requests.get(url=self.url,headers=headers,timeout=5)    # æœ€åŸºæœ¬çš„GETè¯·æ±‚
 
         #print "status_code",response.status_code
 
@@ -86,7 +84,7 @@ class downloadThread(threading.Thread):
 
 
     def run(self):
-        time.sleep(1)  #ĞİÃß1sÒ»ÏÂ
+        time.sleep(1)  #ä¼‘çœ 1sä¸€ä¸‹
         while True:
             if not self.queue_url.empty():
                 url=self.queue_url.get()
@@ -100,13 +98,13 @@ class downloadThread(threading.Thread):
                 
                 
 class parseThread(threading.Thread):
-    def __init__(self,in_queue,out_list,type="jav"):
+    def __init__(self,in_queue,out_list,mtype="jav"):
         threading.Thread.__init__(self)
         self.in_queue=in_queue
         self.out_list=out_list
         self.type=type
 
-    def parseHTML(self,data):
+    def parseHTML(self,data): #for jav parse
         soup = BeautifulSoup(data,"html.parser")
 
         divs=soup.find_all('div',class_='video')
@@ -120,6 +118,7 @@ class parseThread(threading.Thread):
 
         #print res
         return res
+
 
     def parseHTML_jav_detail(self,data):
         soup = BeautifulSoup(data,"html.parser")
@@ -226,7 +225,7 @@ class parseThread(threading.Thread):
 
         return res
 
-          
+      
                                       
     def run2(self):
         while True:
@@ -246,24 +245,24 @@ class parseThread(threading.Thread):
             if sid==-1:
                 break
             if data:
-                if self.type=='jav':
+                if self.mtype=='jav':
                     print "parse by jav!\n"
                     res=self.parseHTML(data)
                     for x,y,z in res:
-                         self.out_list.append((x,y))
-                elif self.type=='jav_detail':
+                        self.out_list.append((x,y))
+                elif self.mtype=='jav_detail':
                     #print "parse by jav_detail\n"
                     x=self.parseHTML_jav_detail(data)
                     self.out_list.append(x)
-                elif self.type=='cl':
+                elif self.mtype=='cl':
                     print "parse by cl!\n"
                     res=self.parseHTML_cl(data)
                     for x,y in res:
-                         self.out_list.append((x,y))
+                        self.out_list.append((x,y))
                 else:
                     res=self.parseHTML(data)
                     for x,y,z in res:
-                         self.out_list.append((x,y))
+                        self.out_list.append((x,y))
 
 
                         
@@ -273,6 +272,8 @@ class parseThread(threading.Thread):
         #self.downfile("http://10.166.2.206/tool/qd/VCruntimes.zip")
 
 
+
+   
 ## class end ############################
 
 
@@ -295,14 +296,14 @@ def down_jav():
 
     pt.start()
 
-    #!µÈ´ıgeturl Thread Íê³É
+    #!ç­‰å¾…geturl Thread å®Œæˆ
     for t in uts:
         t.join()
 
-    #Í¨ÖªptÍË³ö
+    #é€šçŸ¥pté€€å‡º
     q.put((-1,None))
 
-    #!µÈ´ıparse Thread Íê³É    
+    #!ç­‰å¾…parse Thread å®Œæˆ    
     pt.join()
     
     print "size of urls:",len(urls)
@@ -310,10 +311,10 @@ def down_jav():
                      
     urlfile="c:\\javurls.txt"                 
     with open(urlfile,"w") as f:
-         for x,y,z in  urls:
-             #y=y.replace("./?",baseurl+"?")
-             q_urls.put(Z)   
-             f.write(x.encode("utf8")+"\t"+y.encode("utf8")+"\t"+z.encode("utf8")+"\n")
+        for x,y,z in  urls:
+            #y=y.replace("./?",baseurl+"?")
+            q_urls.put(z)   
+            f.write(x.encode("utf8")+"\t"+y.encode("utf8")+"\t"+z.encode("utf8")+"\n")
       
     print "File saved!",urlfile
 
@@ -322,7 +323,7 @@ def down_jav():
                                           
     print "##############################################"
     
-    #¿ªÆôÏÂÔØÎÄ¼şÏß³Ì 
+    #å¼€å¯ä¸‹è½½æ–‡ä»¶çº¿ç¨‹ 
     
     dts=[downloadThread(i,q_urls) for i in xrange(1,11)]
 
@@ -355,24 +356,24 @@ def down_btbt():
 
     pt.start()
 
-    #!µÈ´ıgeturl Thread Íê³É
+    #!ç­‰å¾…geturl Thread å®Œæˆ
     for t in uts:
         t.join()
 
-    #Í¨ÖªptÍË³ö
+    #é€šçŸ¥pté€€å‡º
     q.put((-1,None))
 
-    #!µÈ´ıparse Thread Íê³É    
+    #!ç­‰å¾…parse Thread å®Œæˆ    
     pt.join()
     
     print "size of urls:",len(urls)
                      
     urlfile="c:\\btbt.txt"                 
     with open(urlfile,"w") as f:
-         for x,y in  urls:
-             #y=y.replace("./?",baseurl+"?")
-             q_urls.put(y)
-             f.write(x.encode("utf8")+"\t"+y.encode("utf8")+"\n")
+        for x,y in  urls:
+            #y=y.replace("./?",baseurl+"?")
+            q_urls.put(y)
+            f.write(x.encode("utf8")+"\t"+y.encode("utf8")+"\n")
       
     print "url file saved!",urlfile
 
@@ -401,24 +402,24 @@ def down_cl():
 
     pt.start()
 
-    #!µÈ´ıgeturl Thread Íê³É
+    #!ç­‰å¾…geturl Thread å®Œæˆ
     for t in uts:
         t.join()
 
-    #Í¨ÖªptÍË³ö
+    #é€šçŸ¥pté€€å‡º
     q.put((-1,None))
 
-    #!µÈ´ıparse Thread Íê³É    
+    #!ç­‰å¾…parse Thread å®Œæˆ    
     pt.join()
     
     print "size of urls:",len(urls)
                      
     urlfile="c:\\cl.txt"                 
     with open(urlfile,"w") as f:
-         for x,y in  urls:
-             q_urls.put(y)
-             #y=y.replace("./?",baseurl+"?")
-             f.write(x.encode("utf8")+"\t"+y.encode("utf8")+"\n")
+        for x,y in  urls:
+            q_urls.put(y)
+            #y=y.replace("./?",baseurl+"?")
+            f.write(x.encode("utf8")+"\t"+y.encode("utf8")+"\n")
       
     print "url file saved!",urlfile
  
@@ -426,7 +427,7 @@ def down_cl():
                                           
     print "##############################################"    
  
-     #¿ªÆôÏÂÔØÎÄ¼şÏß³Ì 
+    #å¼€å¯ä¸‹è½½æ–‡ä»¶çº¿ç¨‹ 
     
     dts=[downloadThread(i,q_urls) for i in xrange(1,5)]
 
@@ -440,7 +441,7 @@ def down_cl():
     print "All files download complete!"
 
 
-#txtÀïÎ´ÏÂÍêµÄ²¿·Ö
+#txté‡Œæœªä¸‹å®Œçš„éƒ¨åˆ†
 def down_cl_remainder(all_txt,downed_path):
     
     q_urls=Queue.Queue()
@@ -464,7 +465,7 @@ def down_cl_remainder(all_txt,downed_path):
     print q_urls.qsize()
 
 
-    #¿ªÆôÏÂÔØÎÄ¼şÏß³Ì 
+    #å¼€å¯ä¸‹è½½æ–‡ä»¶çº¿ç¨‹ 
     
     dts=[downloadThread(i,q_urls) for i in xrange(1,3)]
 
@@ -476,7 +477,7 @@ def down_cl_remainder(all_txt,downed_path):
 
     print "Diff files download complete!"
 
-#·ÖÎöcl ´ò¿ªµÄdetailÒ³Ãæ
+#åˆ†æcl æ‰“å¼€çš„detailé¡µé¢
 def down_cl_detail():
     
     q=Queue.Queue()
@@ -496,24 +497,24 @@ def down_cl_detail():
 
     pt.start()
 
-    #!µÈ´ıgeturl Thread Íê³É
+    #!ç­‰å¾…geturl Thread å®Œæˆ
     for t in uts:
         t.join()
 
-    #Í¨ÖªptÍË³ö
+    #é€šçŸ¥pté€€å‡º
     q.put((-1,None))
 
-    #!µÈ´ıparse Thread Íê³É    
+    #!ç­‰å¾…parse Thread å®Œæˆ    
     pt.join()
     
     print "size of urls:",len(urls)
                      
     urlfile="c:\\cl_detail.txt"                 
     with open(urlfile,"w") as f:
-         for x,y,z in  urls:
-             q_urls.put(z)
-             #y=y.replace("./?",baseurl+"?")
-             f.write(x.encode("utf8")+"\t"+y.encode("utf8")+"\t"+z.encode("utf8")+"\n")
+        for x,y,z in  urls:
+            q_urls.put(z)
+            #y=y.replace("./?",baseurl+"?")
+            f.write(x.encode("utf8")+"\t"+y.encode("utf8")+"\t"+z.encode("utf8")+"\n")
       
     print "url file saved!",urlfile
 
@@ -522,7 +523,7 @@ def down_cl_detail():
     print "##############################################"    
     
 
-#±È½ÏÁ½¸ölistµÄ²îÒì²¿·Ö
+#æ¯”è¾ƒä¸¤ä¸ªlistçš„å·®å¼‚éƒ¨åˆ†
 def comparelist_diff(src,des):
     #src: [("name_str","url")]
     #des: ["url"]  
@@ -532,13 +533,13 @@ def comparelist_diff(src,des):
         flag=0
         for a in des:
             if y.replace("\n","")==a.replace("\n",""):
-                 flag=1
+                flag=1
         if flag==0:
             ret.append((x,y)) 
 
     return ret    
 
-#¶ÁÈ¡Ä¿Â¼ÏÂµÄtxtÎÄ¼şµ½list
+#è¯»å–ç›®å½•ä¸‹çš„txtæ–‡ä»¶åˆ°list
 def walkcl(path):
     
     files=[x for x in os.listdir(path) if all([os.path.splitext(x)[1]=='.txt', not os.path.isdir(path+"\\"+x)])]
@@ -552,7 +553,7 @@ def walkcl(path):
     #print store        
     return store  
                                
-#¶Ô±Ècl¿âÎÄ¼ş,µÃµ½²î¼¯£¬²¢Ğ´Èëcl¿â                 
+#å¯¹æ¯”clåº“æ–‡ä»¶,å¾—åˆ°å·®é›†ï¼Œå¹¶å†™å…¥clåº“                 
 def cmp_cl_store(store_path,src):
     #src=[("a","c:\\"),("b","c:\\"),("c","c:\\"),("a","d:\\"),("b","e:\\"),("c","e:\\"),("a","c:\\")]    
     #des=["a","b","c"]
@@ -571,14 +572,14 @@ def cmp_cl_store(store_path,src):
     savefile=store_path+"\\cl_"+sdate+ str(random.randint(10,100))+".txt"  
     with open(savefile,"w") as fs:
         for name,url in diff:
-             fs.write(name.encode("utf-8")+"\t"+url.encode("utf-8")+"\n")
+            fs.write(name.encode("utf-8")+"\t"+url.encode("utf-8")+"\n")
 
     print "Found %s url File saved!"%len(diff)
     
     return diff
 
 
-#ÏÂÔØcl¿âÀï²»´æÔÚµÄ²¿·Ö
+#ä¸‹è½½clåº“é‡Œä¸å­˜åœ¨çš„éƒ¨åˆ†
 def down_store_diff(type):
     
     q=Queue.Queue()
@@ -606,14 +607,14 @@ def down_store_diff(type):
 
     pt.start()
 
-    #µÈ´ıgeturl Thread Íê³É
+    #ç­‰å¾…geturl Thread å®Œæˆ
     for t in uts:
         t.join()
 
-    #Í¨ÖªptÍË³ö
+    #é€šçŸ¥pté€€å‡º
     q.put((-1,None))
 
-    #!µÈ´ıparse Thread Íê³É    
+    #!ç­‰å¾…parse Thread å®Œæˆ    
     pt.join()
 
 
@@ -627,7 +628,7 @@ def down_store_diff(type):
 
         print "q_urls size:",q_urls.qsize()
 
-        #¿ªÆôÏÂÔØÎÄ¼şÏß³Ì 
+        #å¼€å¯ä¸‹è½½æ–‡ä»¶çº¿ç¨‹ 
         
         dts=[downloadThread(i,q_urls) for i in xrange(1,3)]
 
@@ -640,30 +641,30 @@ def down_store_diff(type):
         print "Diff files download complete!"
         
     
-#Ó¦¸ÃÊ¹ÓÃÏß³Ì³Ø
+#åº”è¯¥ä½¿ç”¨çº¿ç¨‹æ± 
 def search_jav(val):
-    q=Queue.Queue()  #´æ·Årequests»ñÈ¡µÄhtml data£ºself.queue.put((self.sid,data))
+    q=Queue.Queue()  #å­˜æ”¾requestsè·å–çš„html dataï¼šself.queue.put((self.sid,data))
     
-    out_urls=[] #´æ·Å½âÎöºÃµÄ½á¹û
+    out_urls=[] #å­˜æ”¾è§£æå¥½çš„ç»“æœ
 
     url ="http://www.j12lib.com/cn/vl_searchbyid.php?keyword="+val
 
-    ut=getUrlThread(url,1,q)  #Êä³öq
+    ut=getUrlThread(url,1,q)  #è¾“å‡ºq
 
-    pt=parseThread(q,out_urls,'jav_detail') #ÊäÈëq,Êä³öout_urls
+    pt=parseThread(q,out_urls,'jav_detail') #è¾“å…¥q,è¾“å‡ºout_urls
 
     #for t in uts:
     ut.start()
 
     pt.start()
 
-    #!µÈ´ıgeturl Thread Íê³É
+    #!ç­‰å¾…geturl Thread å®Œæˆ
     ut.join()
 
-    #Í¨ÖªptÍË³ö
+    #é€šçŸ¥pté€€å‡º
     q.put((-1,None))
 
-    #!µÈ´ıparse Thread Íê³É    
+    #!ç­‰å¾…parse Thread å®Œæˆ    
     pt.join()
     
     #print "size of urls:",len(out_urls)
@@ -678,12 +679,12 @@ def search_jav(val):
     print "File saved!",urlfile
 '''
 
-#Ó¦¸ÃÊ¹ÓÃÏß³Ì³Ø
-def search_jav(slist):
+#åº”è¯¥ä½¿ç”¨çº¿ç¨‹æ± 
+def search_jav1(slist):
 
-    q=Queue.Queue()  #´æ·Årequests»ñÈ¡µÄhtml data£ºself.queue.put((self.sid,data))
+    q=Queue.Queue()  #å­˜æ”¾requestsè·å–çš„html dataï¼šself.queue.put((self.sid,data))
     
-    out=[] #´æ·Å½âÎöºÃµÄ½á¹û
+    out=[] #å­˜æ”¾è§£æå¥½çš„ç»“æœ
     url ="http://www.j12lib.com/cn/vl_searchbyid.php?keyword="
     uts=[]
 
@@ -691,24 +692,24 @@ def search_jav(slist):
     for i in range(len(slist)):
         print "------Add %s\n"%(url+slist[i])
         print "------Allinfo count %s\n"%(len(allinfo))
-        uts.append(getUrlThread(url+slist[i],i,q))  #Êä³öq
+        uts.append(getUrlThread(url+slist[i],i,q))  #è¾“å‡ºq
         out=[]
         if i%10==0:
             print "get start %s\n"%(i)
-            pt=parseThread(q,out,'jav_detail') #ÊäÈëq,Êä³öout_urls
+            pt=parseThread(q,out,'jav_detail') #è¾“å…¥q,è¾“å‡ºout_urls
 
             for ut in uts:
                 ut.start()
 
             pt.start()
 
-            #!µÈ´ıgeturl Thread Íê³É
+            #!ç­‰å¾…geturl Thread å®Œæˆ
             ut.join()
 
-            #Í¨ÖªptÍË³ö
+            #é€šçŸ¥pté€€å‡º
             q.put((-1,None))
 
-            #!µÈ´ıparse Thread Íê³É    
+            #!ç­‰å¾…parse Thread å®Œæˆ    
             pt.join()
             uts=[]
             allinfo+=out
@@ -716,8 +717,8 @@ def search_jav(slist):
 
     urlfile="d:\\javurls.txt"                 
     with open(urlfile,"w") as f:
-         for x in  allinfo:
-             f.write(x+"\n")      
+        for x in  allinfo:
+            f.write(x+"\n")      
 
     print "File saved!",urlfile
                            
@@ -734,11 +735,49 @@ def walkfile(path):
             vid=common.format_rule2(f.replace("\n",""))
 
             wm=re.findall(r'^\d+',vid)
-            if len(wm)==0:  #²»ÊÇwm
+            if len(wm)==0:  #ä¸æ˜¯wm
                 store.append(vid)
     
     return store  
 
+
+def search_jav_by_cast(cast,cname):
+    
+    res=[]
+  
+    baseurl="http://www.j12lib.com/cn/vl_star.php?&mode=&s="+cast+"&page="
+
+    page=0 
+    for i in xrange(1,10):
+        url=baseurl+str(i)
+        #print url
+        
+        response=common.download(url)
+        if response.ok:
+              
+            soup = BeautifulSoup(response.content,"html.parser")
+    
+            divs=soup.find_all('div',class_='video')
+    
+            if divs==None or len(divs)==0:
+                print "Total page=%s"%page
+                break
+            else:
+                for div in divs:
+                    a=div.find('a',class_="")
+                    img=a.find('img')
+                    res.append((a.get("title"),a.get("href"),img.get("src")))
+                
+                page+=1
+    
+    urlfile='d:\\'+cname+'.txt'                 
+    with open(urlfile,"w") as f:
+        for x,y,z in res:
+            f.write(x+"\t"+y+"\t"+z+"\n")      
+
+    print "File saved!%s"%urlfile            
+  
+    
 
 if __name__ == '__main__' :
     TXT_STORE_PATH="d:\\avstore\\"
@@ -752,8 +791,12 @@ if __name__ == '__main__' :
 
     #down_cl_remainder("d:\\cl.txt","d:\\dd")
 
-    st=walkfile(TXT_STORE_PATH)
-    search_jav(st)
+    #st=walkfile(TXT_STORE_PATH)
+    #search_jav(st)
+    #vl_star.php?s=afark ä¸‰å³¶å¥ˆæ´¥å­
+    #search_jav_by_cast('afark',r'ä¸‰å³¶å¥ˆæ´¥å­'.decode("utf-8"))
+    search_jav_by_cast('azoce',r'ä¸‰å¥½äºšçŸ¢'.decode("utf-8"))
+
 
 '''
     urlfile="d:\\javurls.txt"                 
