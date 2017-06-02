@@ -165,7 +165,8 @@ def walkpath(path):
    return files  
 
 
-def walkfile(path):
+#txt文件需要先存为utf-8格式
+def walk_txtstore_file(path):
     
     files=[x for x in os.listdir(path) if all([os.path.splitext(x)[1]=='.txt', not os.path.isdir(path+"\\"+x)])]
     
@@ -174,8 +175,19 @@ def walkfile(path):
     for txtfile in files:
         for line in open(path+"/"+txtfile):
             p,f=os.path.split(line)
-            store.append((common.format_rule2(f),f.replace("\n","").encode('utf-8'),txtfile))
-            #store.append((format_rule2(f),f.replace("\n","").decode("unicode_escape"),txtfile))            
+            
+            ext=f[-4:-1]
+            if ext=="jpg":
+                print "jpg"
+                continue
+            
+            try:
+                store.append((common.format_rule2(f),f.replace("\n","").decode('utf-8'),txtfile))
+                #store.append((common.format_rule2(f),f.replace("\n",""),txtfile))
+                #store.append((format_rule2(f),f.replace("\n","").decode("unicode_escape"),txtfile))    
+            except Exception,e:
+                print txtfile,f
+       
 
     return store  
 

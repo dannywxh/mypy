@@ -1,12 +1,14 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from pymongo import MongoClient
 import os, re, time, sys
 
 from bs4 import BeautifulSoup
-import common
+from pymongo import MongoClient, DESCENDING
+
 import avhandle
+import common
+
 
 reload(sys)
 #print sys.getdefaultencoding()
@@ -16,7 +18,7 @@ print sys.getdefaultencoding()
 
 
 
-def find_dup():
+def find_dup_id():
     client=MongoClient('127.0.0.1',27017)
     dbname='mv'
     db=client[dbname]
@@ -36,18 +38,18 @@ def remove_dup():
     dbname='mv'
     db=client[dbname]
 
-    dup=find_dup()
+    dup=find_dup_id()
 
     for x in db.info.find({"code":{"$in":dup}}).sort([("name", 1)]):
         print str(x["_id"])+"\t"+x["code"]
 
 
-def stats2():
+def find_dup():
     client=MongoClient('127.0.0.1',27017)
     dbname='mv'
     db=client[dbname]
 
-    dup=find_dup()
+    dup=find_dup_id()
 
     dup_file="d:\\dup.txt"
     with open(dup_file,"w") as fs:
@@ -71,7 +73,16 @@ def addtodb(slist):
         except Exception,e:
             print e
 
-
+def txtstore_addtodb(slist):
+    client=MongoClient('127.0.0.1',27017)
+    dbname='mv'
+    db=client[dbname]
+    for vid,vname,disk in slist:
+        try:
+            db.jav.insert({"code":vid,"name":vname,"disk":disk})
+        except Exception,e:
+            print e
+            
 def update_one(id,fullname,url):
     client=MongoClient('127.0.0.1',27017)
     dbname='mv'
@@ -162,19 +173,22 @@ if __name__ == '__main__' :
     TXT_STORE_PATH="d:\\avstore\\"
     TXT_INFO_PATH="d:\\avinfo\\"
       
-    #des=walkfile(TXT_STORE_PATH)
-    update_fullname(TXT_INFO_PATH)
+#     des=avhandle.walk_txtstore_file(TXT_STORE_PATH)
+#     print len(des)
+#     txtstore_addtodb(des)
+    
+    #update_fullname(TXT_INFO_PATH)
     
     #for a,b,c,d,e in des:
     #    update_multi(a,b,c,d,e)
-    #addtodb(des)
+    
 
     #for a,b,c in des:
     #    update_multi(a,b,c)
 
     #print "update done!"
     
-    #stats2()
+    find_dup()
 
     #update_multi("pppd413")
     #findmv()
