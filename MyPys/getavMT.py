@@ -98,11 +98,11 @@ class downloadThread(threading.Thread):
                 
                 
 class parseThread(threading.Thread):
-    def __init__(self,in_queue,out_list,mtype="jav"):
+    def __init__(self,in_queue,out_list,type="jav"):
         threading.Thread.__init__(self)
         self.in_queue=in_queue
         self.out_list=out_list
-        self.type=type
+        self.mtype=type
 
     def parseHTML(self,data): #for jav parse
         soup = BeautifulSoup(data,"html.parser")
@@ -668,7 +668,7 @@ def search_jav(val):
     pt.join()
     
     #print "size of urls:",len(out_urls)
-
+    print out_urls 
     return out_urls
 '''
     urlfile="d:\\javurls.txt"                 
@@ -680,22 +680,28 @@ def search_jav(val):
 '''
 
 #应该使用线程池
-def search_jav1(slist):
+'''
+输入vid list，查询每个vid的详细信息，并把结果存入文件
+'''
+def get_javdetail_by_list(slist):
 
     q=Queue.Queue()  #存放requests获取的html data：self.queue.put((self.sid,data))
     
-    out=[] #存放解析好的结果
+    out=[] #存放解析好的结
+    
     url ="http://www.j12lib.com/cn/vl_searchbyid.php?keyword="
     uts=[]
 
     allinfo=[] 
-    for i in range(len(slist)):
+    
+    count=len(slist)
+    for i in range(count):
         print "------Add %s\n"%(url+slist[i])
         print "------Allinfo count %s\n"%(len(allinfo))
         uts.append(getUrlThread(url+slist[i],i,q))  #输出q
         out=[]
-        if i%10==0:
-            print "get start %s\n"%(i)
+        if i==count-1 or (i+1)%10==0:
+            print "start at %s\n"%(i)
             pt=parseThread(q,out,'jav_detail') #输入q,输出out_urls
 
             for ut in uts:
@@ -704,17 +710,21 @@ def search_jav1(slist):
             pt.start()
 
             #!等待geturl Thread 完成
-            ut.join()
+            for ut in uts:
+                ut.join()
 
             #通知pt退出
             q.put((-1,None))
 
             #!等待parse Thread 完成    
             pt.join()
+            
             uts=[]
             allinfo+=out
+   
 
 
+    print allinfo 
     urlfile="d:\\javurls.txt"                 
     with open(urlfile,"w") as f:
         for x in  allinfo:
@@ -793,15 +803,24 @@ if __name__ == '__main__' :
 
     #st=walkfile(TXT_STORE_PATH)
     #search_jav(st)
+    
+    #http://www.j12lib.com/cn/vl_searchbyid.php?keyword
+    #search_jav('soe312')
+    
+    vids=walkfile(TXT_STORE_PATH)
+    #vid=["soe312","soe324","soe325"]
+    
+    print len(vids)
+    
+    #get_javdetail_by_list(vids)
+    
     #vl_star.php?s=afark 三島奈津子
     #search_jav_by_cast('afark',r'三島奈津子'.decode("utf-8"))
     #search_jav_by_cast('azoce',r'三好亚矢'.decode("utf-8"))
     
     #search_jav_by_cast('anfq',u'奥田咲')
     
-    search_jav_by_cast('ay3rs',u'千乃あずみ')
-    
-    
+    #search_jav_by_cast('ay3rs',u'千乃あずみ')
     
 
 
