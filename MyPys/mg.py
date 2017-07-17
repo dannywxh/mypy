@@ -221,7 +221,7 @@ if __name__ == '__main__' :
     
 #查找目录下已经存在的片子。与mgdb库比较
     #find_path_dup_from_mgdb("d:\\torrents")
-    find_path_dup_from_mgdb("C:\\pp")
+    find_path_dup_from_mgdb("h:\\0710")
 
    
     
