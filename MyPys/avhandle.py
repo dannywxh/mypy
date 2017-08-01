@@ -76,54 +76,23 @@ def top_counts(dic_counts,n=10):
     return kv_pairs[-n:]
 
 
-def format_rule2(s):
-        rs=''
-        #匹配开头是数字,判断是非wm编号 
-        wm=re.findall(r'^\d+',s)
-     
-        if len(wm)==1:  #是wm
-            rs=s[0:10]
-            return rs
 
-        # 如:mide-267FHD_ok_0001.mp4
-        #查找所有的非数字,['mide-', 'FHD_ok_', '.mp']
-        #第一个元素就是"mide-"
-        alpha_list=re.findall(r'\D+', s)
-        
-        if len(alpha_list)>0: 
-            rs+=alpha_list[0]
-
-        #查找所有的数字,['267', '0001', '4']
-        #第一个元素就是"267"
-        num_list=re.findall(r'\d+', s)
-
-        if len(num_list)>0:
-            rs+=num_list[0]
-
-        if rs=='':
-            rs=s
-
-        rs=rs.replace("-","")
-        rs=rs.replace(" ","")
-        rs=rs.replace("_","")
-        rs=rs.lower()
-        return rs
 
   
 #for test                          
 def format_vcode(path):
-    vcodes=[(format_rule2(x)) for x in os.listdir(path) if not os.path.isdir(path+"\\"+x)]
+    vcodes=[(common.format_rule2(x)) for x in os.listdir(path) if not os.path.isdir(path+"\\"+x)]
     print vcodes
      
      
 #r=1 表示同时搜索子目录
 def finddup2(path,r=0):
 
-    files=[(format_rule2(x),x,path) for x in os.listdir(path) if not os.path.isdir(path+"\\"+x)]
+    files=[(common.format_rule2(x),x,path) for x in os.listdir(path) if not os.path.isdir(path+"\\"+x)]
             
     if r==1:
         allfiles=walkpath(path)
-        files=[(format_rule2(x),x,p) for x,p in allfiles]
+        files=[(common.format_rule2(x),x,p) for x,p in allfiles]
    
     #print files     #files的格式为
     #[(u'030117_004', u'030117_004-FHD.torrent', u'd:\\new\\torrent'), (u'030317_038', u'030317_038.torrent', u'd:\\new\\torrent')]
@@ -260,7 +229,7 @@ def comparelist(src,des):
     for x in src:
         for a,b in des:
             #print x,a,b
-            if format_rule2(x)==format_rule2(a):
+            if coommformat_rule2(x)==format_rule2(a):
                  dic[x].append(os.path.join(b,a))       
 
     return dic    
@@ -341,7 +310,7 @@ def create_html_format_l(path,file):
         #[s.extract() for s in soup.find_all('meta')]
         
         with open(path+"\\new"+title+".html","w") as f:
-             f.write(soup.prettify().encode('utf8'))
+            f.write(soup.prettify().encode('utf8'))
 
         print "new file created!"
         return ""
@@ -355,7 +324,6 @@ def create_html_format_l(path,file):
 #适用于cl的页面
 def create_html_format_2(path,file):
 
-    html="" 
     with open(path+"\\"+file,"rb") as f:
         html=f.read()
 

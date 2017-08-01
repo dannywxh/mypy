@@ -732,7 +732,7 @@ def get_javdetail_by_list(slist):
 
     print "File saved!",urlfile
                            
-
+#return vids: ['a','b']
 def walkfile(path):
     
     files=[x for x in os.listdir(path) if all([os.path.splitext(x)[1]=='.txt', not os.path.isdir(path+"\\"+x)])]
@@ -751,7 +751,7 @@ def walkfile(path):
     return store  
 
 
-def search_jav_by_cast(cast,cname):
+def search_all_of_cast(cast,cname):
     
     res=[]
   
@@ -787,7 +787,9 @@ def search_jav_by_cast(cast,cname):
 
     print "File saved!%s"%urlfile            
   
-    
+  
+
+
 
 if __name__ == '__main__' :
     TXT_STORE_PATH="d:\\avstore\\"
@@ -807,23 +809,25 @@ if __name__ == '__main__' :
     #http://www.j12lib.com/cn/vl_searchbyid.php?keyword
     #search_jav('soe312')
     
-    vids=walkfile(TXT_STORE_PATH)
+    #vids=walkfile(TXT_STORE_PATH)
     #vid=["soe312","soe324","soe325"]
     
-    print len(vids)
+    #print len(vids)
     
     #get_javdetail_by_list(vids)
     
     #vl_star.php?s=afark 三島奈津子
-    #search_jav_by_cast('afark',r'三島奈津子'.decode("utf-8"))
-    #search_jav_by_cast('azoce',r'三好亚矢'.decode("utf-8"))
+    #search_all_of_cast('afark',r'三島奈津子'.decode("utf-8"))
+    #search_all_of_cast('azoce',r'三好亚矢'.decode("utf-8"))
     
-    #search_jav_by_cast('anfq',u'奥田咲')
+    #search_all_of_cast('anfq',u'奥田咲')
     
-    #search_jav_by_cast('ay3rs',u'千乃あずみ')
-    
+    #search_all_of_cast('ay3rs',u'千乃あずみ')
 
 
+
+
+    
 '''
     urlfile="d:\\javurls.txt"                 
     with open(urlfile,"w") as f:

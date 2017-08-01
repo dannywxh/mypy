@@ -1,6 +1,7 @@
 eclipse.preferences.version=1
 encoding/<project>=UTF-8
 encoding/avhandle.py=utf-8
+encoding/avso.py=utf-8
 encoding/common.py=utf-8
 encoding/getavMT.py=utf-8
 encoding/mg.py=utf-8

@@ -30,27 +30,36 @@ def parse_tor(file):
 
     bt_file.close()
  
-
-
+#提取无码的格式，如  082516-001
+def format_rule1(s):
+ 
+    pattern="\d{6}-\d{3}|\d{6}-\d{2}|\d{6}_\d{3}|\d{6}_\d{2}"
+    
+    rs=re.findall(pattern, s);
+    
+    return rs;
+    
+    
+ 
 def format_rule2(s):
         rs=''
-        #ƥ�俪ͷ������,�ж��Ƿ�wm��� 
+        #匹配开头是数字,判断是非wm编号 
         wm=re.findall(r'^\d+',s)
      
-        if len(wm)==1:  #��wm
+        if len(wm)==1:  #是wm
             rs=s[0:10]
             return rs
 
-        # ��:mide-267FHD_ok_0001.mp4
-        #�������еķ�����,['mide-', 'FHD_ok_', '.mp']
-        #��һ��Ԫ�ؾ���"mide-"
+        # 如:mide-267FHD_ok_0001.mp4
+        #查找所有的非数字,['mide-', 'FHD_ok_', '.mp']
+        #第一个元素就是"mide-"
         alpha_list=re.findall(r'\D+', s)
         
         if len(alpha_list)>0: 
             rs+=alpha_list[0]
 
-        #�������е�����,['267', '0001', '4']
-        #��һ��Ԫ�ؾ���"267"
+        #查找所有的数字,['267', '0001', '4']
+        #第一个元素就是"267"
         num_list=re.findall(r'\d+', s)
 
         if len(num_list)>0:
@@ -64,7 +73,7 @@ def format_rule2(s):
         rs=rs.replace("_","")
         rs=rs.lower()
         return rs
-
+    
   
 #for test                          
 def format_torrent(path):
