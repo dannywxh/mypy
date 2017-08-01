@@ -176,16 +176,20 @@ def get_vid_full_info(vid):
     detail_urls= serch_movie_byvid(vid)
     
     infos=[]
-    for mtype,url in detail_urls:
-        casts=get_movie_cast(url)
-        infos.append(vid+","+mtype+","+casts)
+    if detail_urls!=-1:
+        for mtype,url in detail_urls:
+            casts=get_movie_cast(url)
+            infos.append(vid+","+mtype+","+casts)
                     
     return infos    
 
 #wrapper function
 def get_vidlist_full_info():
     
-    idlist=['082516-001','080117_01','062717_110']
+    #idlist=['082516-001','080117_01','062717_110']
+    
+    idlist= walkpath(r"D:\\avstore")
+    print idlist
     
     infos=[]
     for id in idlist:
@@ -201,31 +205,27 @@ def get_vidlist_full_info():
 
     print "File saved!%s"%infofile       
 
-def walkfile(path):
+def walkpath(path):
     
     files=[x for x in os.listdir(path) if all([os.path.splitext(x)[1]=='.txt', not os.path.isdir(path+"\\"+x)])]
     
     store=[]
     for txtfile in files:
         for line in open(path+"/"+txtfile):
-            
-            store.append(common.format_rule1(line))
-            #store.append((format_rule2(vid.encode("utf8")),vid.encode('utf-8'),url))
-            #store.append((format_rule2(f),f.replace("\n","").decode("unicode_escape"),txtfile))            
+            p,f=os.path.split(line)
+            id=common.format_rule1(f.replace("\n",""))
+            if id!="":
+                #store.append((id,txtfile))
+                store.append(id)
 
     return store  
 
+
+
 if __name__ == '__main__' :
     #TXT_STORE_PATH="d:\\avstore\\"
-
     
-    
-    idlist=['082516-001 dsacssa','cfdc80117_01 dsa','062717_110dsa']
-    
-    for id in idlist:
-        print common.format_rule1(id)    
-
-    #get_vidlist_full_info()
+    get_vidlist_full_info()
     
 '''
     urlfile="d:\\javurls.txt"                 
