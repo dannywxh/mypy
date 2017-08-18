@@ -17,8 +17,6 @@ sys.setdefaultencoding('utf-8')
 print sys.getdefaultencoding()
 
 
-
-
 def find_dup_id():
     client=MongoClient('127.0.0.1',27017)
     dbname='mv'
