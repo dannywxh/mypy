@@ -50,12 +50,12 @@ if __name__ == '__main__' :
     #baseurl="chttp://www.le.com/ptv/vplay/20029893.html#vid=20029893"
     #getpginfo(baseurl)
 
-    htmlfile = open("c:\\ypez.html", 'r')  #以只读的方式打开本地html文件
+    htmlfile = open("c:\\drj.html", 'r')  #以只读的方式打开本地html文件
     html = htmlfile.read()
 
     ret=parse(html)
 
-    with open("c:\\url.txt","w") as f:
+    with open("d:\\url.txt","w") as f:
         for x in ret:
             f.write(x+"\n")
 

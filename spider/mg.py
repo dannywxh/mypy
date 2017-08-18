@@ -16,6 +16,7 @@ reload(sys)
 sys.setdefaultencoding('utf-8')
 print sys.getdefaultencoding()
 
+#git test
 
 def find_dup_id():
     client=MongoClient('127.0.0.1',27017)
