@@ -206,7 +206,7 @@ def find_path_dup_from_mgdb(path):
                  
     print "save found dup file done!",savefile
 
-
+#参数为：path下的txt文件
 def find_exist_to_list(path):
 
     src_vids=common.getFormated_vcode_walkpath_txtfile(path)
@@ -271,7 +271,7 @@ if __name__ == '__main__' :
 #查找目录下已经存在的片子。与mgdb库比较
     #find_path_dup_from_mgdb("c:\\torrent")
     #find_not_exist_to_list('e:\\tt')
-    find_exist_to_list('e:\\')
+    find_exist_to_list(u'G:\乳香世家')
     #find_path_dup_from_mgdb("h:\\0710")
 
    

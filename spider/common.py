@@ -4,6 +4,8 @@ import os, re, time, sys
 import hashlib, bencode
 import requests
 
+from os.path import getsize
+
 from bs4 import BeautifulSoup
 
 
@@ -91,7 +93,32 @@ def walkpath(path):
         for filename in filenames:
             files.append((filename,dirpath))
        
-    return files  
+    return files
+
+
+def walkpathwithFileSize(path):
+    # files= [(dirpath,filenames) for dirpath,dirname,filenames in os.walk(path)]
+    files = []
+    for dirpath, dirname, filenames in os.walk(path.decode('utf-8')):
+        for filename in filenames:
+            ext = filename[-3:].lower()
+            #print ext
+            exts = ['mkv', 'wmv', 'mp4', 'avi']
+            if ext in exts:
+                #print dirname,dirpath
+                size=getsize(os.path.join(dirpath, filename)) / (1024.0 * 1024.0)
+                if size>1024:
+                    size=round(size/1024.0,2)
+                else:
+                    size=round(size,1)
+
+
+                print filename, size
+                files.append((filename,size, dirpath))
+
+    print len(files)
+    return files
+
 
 
 def walkfile(path):
@@ -160,11 +187,14 @@ def download(url):
 
 if __name__ == '__main__':
 
+    """
     a=["DOKS-023","DOKS-055","DOKS-078","DOKS-123","DOKS-125","DOKS-139","DOKS-140",
     "DOKS-150","DOKS-155","DOKS-168","DOKS-187","DOKS-189","DOKS-217","DOKS-232","DOKS-234"]
 
     b=[format_rule2(x) for x in a]
 
     print b
+    """
 
-                 
+    walkpathwithFileSize("g:\\av\\achive")
+
