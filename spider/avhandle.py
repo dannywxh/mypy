@@ -15,69 +15,6 @@ print sys.getdefaultencoding()
 
 
 
-def parse_tor(file):
-    bt_path = {}
-
-    bt_file = open(file, 'rb')
-    bt_info = bencode.bdecode(bt_file.read()).get('info')
-    bt_info_hash_hex = hashlib.sha1(bencode.bencode(bt_info)).hexdigest()
-  
-    bt_file_size = bt_info.get('length')
-    bt_file_name = bt_info.get('name')
-    
-    bt_path[bt_file_name]=bt_file_size
-
-    print bt_path 
-
-    bt_file.close()
- 
-
-def format_name(oriname):
-    print oriname 
-    mode=re.compile(r'\d+')
-    d=mode.findall(oriname)[0]
-    c=oriname.split(d)[0]
-
-    fmtname=c+d
-    print fmtname
-
-    return fmtname
-
-#计数
-#sequence的格式是list：[1,2,3,4...]
-def get_count1(sequence):
-    counts={}
-    for x in sequence:
-        if x in counts:
-            counts[x]+=1
-        else:
-            counts[x]=1
-    return counts
-
-#获取计数大于1的数据
-#sequence的格式是元组：(x,y)
-def get_dup_dic(sequence):
-    counts={}
-    for x,y,z in sequence:
-        if x in counts:
-            counts[x]+=1
-        else:
-            counts[x]=1
-            
-    kv_pairs=[(count,tz) for count,tz in counts.items() if tz>1]
-    return kv_pairs
-            
-
-
-#top 10
-def top_counts(dic_counts,n=10):
-    kv_pairs=[(count,tz) for count,tz in dic_counts.items()]
-    kv_pairs.sort()
-    return kv_pairs[-n:]
-
-
-
-
   
 #for test                          
 def format_vcode(path):
@@ -90,8 +27,8 @@ def finddup2(path,r=0):
 
     files=[(common.format_rule2(x),x,path) for x in os.listdir(path) if not os.path.isdir(path+"\\"+x)]
             
-    if r==1:
-        allfiles=walkpath(path)
+    if r == 1:
+        allfiles=common.walkpath(path)
         files=[(common.format_rule2(x),x,p) for x,p in allfiles]
    
     #print files     #files的格式为
@@ -102,8 +39,8 @@ def finddup2(path,r=0):
     #     files=[line for line in open(txtPath+"/"+txtf)]
 
     #获取计数大于1（即重复）的元素
-    dup_dic=get_dup_dic(files)
-    #print dic
+    dup_dic=common.get_dup_dic(files)
+    print dup_dic
     
     from collections import defaultdict
     #元组转字典          
@@ -122,17 +59,9 @@ def finddup2(path,r=0):
                  #print x
                  fs.write(x[0]+"\t"+x[1]+"\n")
                  
-    print "save found dup file done!",savefile             
+    print "Save found dup file done!",savefile
     
-    
-def walkpath(path):
-    #files= [(dirpath,filenames) for dirpath,dirname,filenames in os.walk(path)]
-    files= []
-    for dirpath,dirname,filenames in os.walk(path.decode('utf-8')):
-        for filename in filenames:
-            files.append((filename,dirpath))
-        
-    return files  
+
 
 def path_code_format(path,only_code=True):
     
@@ -217,23 +146,7 @@ def walkfile1(path):
 
     return store  
     
-#两个list对比核心功能，其他功能调用
-def comparelist(src,des):
-    #src: ["file"]    
-    #des:[("file","path")]
-    
-    from collections import defaultdict
 
-    dic=defaultdict(list)       
-
-    for x in src:
-        for a,b in des:
-            #print x,a,b
-            if common.format_rule2(x)==common.format_rule2(a):
-                 dic[x].append(os.path.join(b,a))       
-
-    return dic    
-    
                         
                  
 #对比torrent 库文件                 
@@ -501,9 +414,10 @@ if __name__ == '__main__' :
         
     else:
         #cmp_txt_store("c:\\torrent")
-        cmp_tor_store("e:\\notexist.txt")
+        #cmp_tor_store("e:\\notexist.txt")
         #create_htmls("d:\\dd")
-        #finddup2("d:\\new\\torrent",1)
+        #finddup2("D:\\torrents",1)
+        finddup2("c:\\torrent", 1)
         
         #format_vcode(u"H:\\av\\ok")
 

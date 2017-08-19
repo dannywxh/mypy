@@ -84,37 +84,86 @@ def format_rule2(s):
 def format_torrent(path):
     for x in  os.listdir(path):
         print format_rule2(x)
-     
-    
+
+    # 两个list对比核心功能，其他功能调用
+    def comparelist(src, des):
+        # src: ["file"]
+        # des:[("file","path")]
+
+        from collections import defaultdict
+
+        dic = defaultdict(list)
+
+        for x in src:
+            for a, b in des:
+                # print x,a,b
+                if format_rule2(x) == format_rule2(a):
+                    dic[x].append(os.path.join(b, a))
+
+        return dic
+
+    # 计数
+# sequence的格式是list：[1,2,3,4...]
+def get_count1(sequence):
+    counts = {}
+    for x in sequence:
+        if x in counts:
+            counts[x] += 1
+        else:
+            counts[x] = 1
+    return counts
+
+
+# 获取计数大于1的数据
+# sequence的格式是元组：(x,y)
+def get_dup_dic(sequence):
+    counts = {}
+    for x, y, z in sequence:
+        if x in counts:
+            counts[x] += 1
+        else:
+            counts[x] = 1
+
+    kv_pairs = [(count, tz) for count, tz in counts.items() if tz > 1]
+    return kv_pairs
+
+
+# top 10
+def top_counts(dic_counts, n=10):
+    kv_pairs = [(count, tz) for count, tz in dic_counts.items()]
+    kv_pairs.sort()
+    return kv_pairs[-n:]
+
+
 def walkpath(path):
     #files= [(dirpath,filenames) for dirpath,dirname,filenames in os.walk(path)]
     files= []
     for dirpath,dirname,filenames in os.walk(path.decode('utf-8')):
         for filename in filenames:
             files.append((filename,dirpath))
-       
+
+    print "files count:%d"%len(files)
     return files
 
 
-def walkpathwithFileSize(path):
+def walkpath_withFileSize(path):
     # files= [(dirpath,filenames) for dirpath,dirname,filenames in os.walk(path)]
     files = []
-    for dirpath, dirname, filenames in os.walk(path.decode('utf-8')):
-        for filename in filenames:
+    for fulldirpath, dirnameList, filenameList in os.walk(path.decode('utf-8')):
+        for filename in filenameList:
             ext = filename[-3:].lower()
             #print ext
-            exts = ['mkv', 'wmv', 'mp4', 'avi']
+            exts = ['mkv', 'wmv', 'mp4', 'avi','rmvb']
             if ext in exts:
                 #print dirname,dirpath
-                size=getsize(os.path.join(dirpath, filename)) / (1024.0 * 1024.0)
+                size=getsize(os.path.join(fulldirpath, filename)) / (1024.0 * 1024.0)
                 if size>1024:
                     size=round(size/1024.0,2)
                 else:
                     size=round(size,1)
 
-
-                print filename, size
-                files.append((filename,size, dirpath))
+                #print filename, size, fulldirpath
+                files.append((filename,size, fulldirpath))
 
     print len(files)
     return files
@@ -196,5 +245,5 @@ if __name__ == '__main__':
     print b
     """
 
-    walkpathwithFileSize("g:\\av\\achive")
+    walkpath_withFileSize("g:\\av\\achive")
 
