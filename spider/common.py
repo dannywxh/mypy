@@ -198,6 +198,34 @@ def getFormated_vcode_walkpath_txtfile(path):
     return store
 
 
+# txt文件需要先存为utf-8格式
+def walk_txtstore_file(path, only_code=False):
+    files = [x for x in os.listdir(path) if all([os.path.splitext(x)[1] == '.txt', not os.path.isdir(path + "\\" + x)])]
+
+    # txtfile=[f for f in files if os.path.splitext(f)[1]=='.txt']
+    store = []
+    for txtfile in files:
+        for line in open(path + "/" + txtfile):
+            p, f = os.path.split(line)
+
+            ext = f[-4:-1]
+            if ext == "jpg":
+                print "jpg"
+                continue
+
+            try:
+                if only_code:
+                    store.append(format_rule2(f))
+                else:
+                    store.append((format_rule2(f), f.replace("\n", "").decode('utf-8'), txtfile))
+                    # store.append((common.format_rule2(f),f.replace("\n",""),txtfile))
+                    # store.append((format_rule2(f),f.replace("\n","").decode("unicode_escape"),txtfile))
+            except Exception, e:
+                print txtfile, f
+
+    return store
+
+
 #����list�ԱȺ��Ĺ��ܣ������ܵ���
 def comparelist(src,des):
     #src: ["file"]    

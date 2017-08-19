@@ -89,16 +89,18 @@ def addtodb(slist):
         except Exception,e:
             print e
 
-def txtstore_addtodb(slist):
+def addtodb1(slist):
     client=MongoClient('127.0.0.1',27017)
     dbname='mv'
     db=client[dbname]
-    for vid,vname,disk in slist:
+    for vname,size,fullpath in slist:
         try:
-            db.jav.insert({"code":vid,"name":vname,"disk":disk})
-        except Exception,e:
-            print e
-            
+            ndate=time.strftime('%Y-%m-%d', time.localtime(time.time()))
+            db.jav.insert({"code":common.format_rule2(vname),"name":vname,"size":size,"disk":fullpath,"cdate":ndate})
+        except Exception as e:
+            print e.message
+
+
 def update_one(id,fullname,url):
     client=MongoClient('127.0.0.1',27017)
     dbname='mv'
@@ -112,12 +114,22 @@ def update_one(id,fullname,url):
     db.jav.save(u1)
 
 
-def update_multi(id,name,cast,vdate,score):
+def update_av_info_multi(id,name,cast,vdate,score):
     client=MongoClient('127.0.0.1',27017)
     dbname='mv'
     db=client[dbname]
+    for name, cast,vdate,score in slist:
+        id = common.format_rule2(name)
+        db.jav.update({"code":id}, {"$set":{"fullname":name,"cast":cast,"date":vdate,"score":score}},upsert=True, multi=True) # update jav set url ="new url1"
 
-    db.jav.update({"code":id}, {"$set":{"fullname":name,"cast":cast,"date":vdate,"score":score}},upsert=True, multi=True) # update jav set url ="new url1"
+
+def update_size(slist):
+    client=MongoClient('127.0.0.1',27017)
+    dbname='mv'
+    db=client[dbname]
+    for vname, size, fullpath in slist:
+        id=common.format_rule2(vname)
+        db.jav.update({"code":id,"cdate":"2017-08-19"}, {"$set":{"size":size}},upsert=True, multi=True) # update jav set url ="new url1"
 
 def query_like(val):
     client=MongoClient('127.0.0.1',27017)
@@ -252,10 +264,13 @@ if __name__ == '__main__' :
     TXT_INFO_PATH="d:\\avinfo\\"
 
 #增加新片到库      
-#     des=avhandle.walk_txtstore_file(u"G:\\3",only_code=False)
-#     print len(des)
-#     print des
-#     txtstore_addtodb(des)
+    #des=common.walk_txtstore_file(u"G:\\3",only_code=False)
+
+    des=common.walkpath_withFileSize("g:\\av\\achive")
+    print len(des)
+    print des
+    #addtodb1(des)
+    update_size(des)
     
     #update_fullname(TXT_INFO_PATH)
     
@@ -271,7 +286,7 @@ if __name__ == '__main__' :
 #查找目录下已经存在的片子。与mgdb库比较
     #find_path_dup_from_mgdb("c:\\torrent")
     #find_not_exist_to_list('e:\\tt')
-    find_exist_to_list(u'G:\乳香世家')
+    #find_exist_to_list(u'G:\乳香世家')
     #find_path_dup_from_mgdb("h:\\0710")
 
    
