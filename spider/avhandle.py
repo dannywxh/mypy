@@ -25,11 +25,11 @@ def format_vcode(path):
 #r=1 表示同时搜索子目录
 def finddup2(path,r=0):
 
-    files=[(common.format_rule2(x),x,path) for x in os.listdir(path) if not os.path.isdir(path+"\\"+x)]
+    files=[(common.format_rule2(x),common.format_rule3(x),path) for x in os.listdir(path.decode('utf-8')) if not os.path.isdir(path+"\\"+x)]
             
     if r == 1:
         allfiles=common.walkpath(path)
-        files=[(common.format_rule2(x),x,p) for x,p in allfiles]
+        files=[(common.format_rule2(x),common.format_rule3(x),p) for x,p in allfiles]
    
     #print files     #files的格式为
     #[(u'030117_004', u'030117_004-FHD.torrent', u'd:\\new\\torrent'), (u'030317_038', u'030317_038.torrent', u'd:\\new\\torrent')]
@@ -48,7 +48,7 @@ def finddup2(path,r=0):
     for k,v,p in files:
         d[k].append((v,p))
     
-    #print d
+    print len(dup_dic)
     
     savefile=path+"\\dup.txt"
     
@@ -56,8 +56,9 @@ def finddup2(path,r=0):
         #获取重复的文件名
         for it in dup_dic:
             for x in d[it[0]]:
-                 #print x
-                 fs.write(x[0]+"\t"+x[1]+"\n")
+                 #fs.write(x[0]+"\t"+x[1]+"\n")
+                 fs.write('move "{0}\{1}*" ..\ \n'.format(x[1],x[0]))
+
                  
     print "Save found dup file done!",savefile
     
@@ -390,7 +391,7 @@ if __name__ == '__main__' :
         #cmp_tor_store("e:\\notexist.txt")
         #create_htmls("d:\\dd")
         #finddup2("D:\\torrents",1)
-        finddup2("c:\\torrent", 1)
+        finddup2(r"D:\\vv\\ok", 1)
         
         #format_vcode(u"H:\\av\\ok")
 

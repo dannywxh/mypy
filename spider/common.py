@@ -78,9 +78,39 @@ def format_rule2(s):
     rs=rs.replace("_","")
     rs=rs.lower()
     return rs
-    
-  
-#for test                          
+
+#提取番号部分
+def format_rule3(s):
+    rs = ''
+    # 匹配开头是数字,判断是非wm编号
+    wm = re.findall(r'^\d+', s)
+
+    if len(wm) == 1:  # 是wm
+        rs = s[0:10]
+        return rs
+
+    # 如:mide-267FHD_ok_0001.mp4
+    # 查找所有的非数字,['mide-', 'FHD_ok_', '.mp']
+    # 第一个元素就是"mide-"
+    alpha_list = re.findall(r'\D+', s)
+
+    if len(alpha_list) > 0:
+        rs += alpha_list[0]
+
+    # 查找所有的数字,['267', '0001', '4']
+    # 第一个元素就是"267"
+    num_list = re.findall(r'\d+', s)
+
+    if len(num_list) > 0:
+        rs += num_list[0]
+
+    if rs == '':
+        rs = s
+
+    return rs
+
+
+#for test
 def format_torrent(path):
     for x in  os.listdir(path):
         print format_rule2(x)
