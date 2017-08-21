@@ -6,6 +6,11 @@ from bs4 import BeautifulSoup
 import requests
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.by import By
+
+from selenium.common.exceptions import NoSuchElementException
+from selenium.common.exceptions import TimeoutException
 import os
 import time
 import common
@@ -14,45 +19,60 @@ def searchbt(keywd_list):
 
     driver = webdriver.Chrome()
 
-    #url="http://btkitty.pet/"
     url="http://zhainanbt.com/"
     driver.get(url)
 
     mgs=[]
     for keywd in keywd_list:
         print  "start:"+keywd
-        #time.sleep(1)
-        #elem=driver.find_element_by_name('keyword')
+
         try:
-            # kwd/html/body/div[1]/div[3]/div[2]/form/div/div[2]
-            #elem = WebDriverWait(driver, 10).until(lambda x: x.find_element_by_xpath('// form[ @name ="search"]/div /div /input#kwd'))
-            elem = WebDriverWait(driver, 10).until(
+            elem = WebDriverWait(driver, 5,0.5, ignored_exceptions=None).until(
                 lambda x: x.find_element_by_xpath('// input[ @ id = "kwd"]'))
 
-            #elem=driver.find_element_by_xpath('// form[ @class ="form-inline hidden-xs search fullsearch-form"]/div /input')
+            #elem = WebDriverWait(driver, 5, 0.5, ignored_exceptions=None).until(
+            #EC.presence_of_element_located((By.ID, "kwd")))
+
             elem.clear()
             elem.send_keys(keywd)
             elem.send_keys(Keys.RETURN)
 
+            elem_btn=driver.find_element_by_xpath('// form[ @ id = "searchFrom"] / div / div[1] / button');
+            if elem_btn:
+                print "click!"
+                print elem_btn
+                #elem_btn.click()
+
+
+            #elem_btn = WebDriverWait(driver, 5, 0.5, ignored_exceptions=None).until(
+            #    lambda x: x.find_element_by_xpath('// form[ @ id = "searchFrom"] / div / div[1] / button'))
+
+        except NoSuchElementException as e:
+            print e.message
+            driver.refresh()
+
+        except TimeoutException as e:
+            print e.message
+            driver.refresh()
+
+        else:
             soup = BeautifulSoup(driver.page_source, 'lxml')
 
-            names = soup.select('dl.list-con > dt > a')
-            #print names
+            names = soup.select('dl.item > dt > a')
+            print names
 
-            urls = soup.select('dl.list-con > dd.option > span:nth-of-type(1) > a')
+            urls = soup.select('dl.item > dd.attr > span:nth-of-type(6) > a')
             print urls
 
-            speeds = soup.select('dl.list-con > dd.option > span:nth-of-type(5) ')
-            #print speeds
+            speeds = soup.select('dl.item > dd.attr > span:nth-of-type(5)')
+            print speeds
 
-            counts = soup.select('dl.list-con > dd.option > span:nth-of-type(6) ')
-            #print counts
+            counts = soup.select('dl.item > dd.attr > span:nth-of-type(4)')
+            print counts
 
             for name,url,speed,count in zip(names,urls,speeds,counts):
                 mgs.append(name.get_text()+"\t"+url['href']+"\t"+speed.get_text()+"\t"+count.get_text())
 
-        except Exception as e:
-            print e.message
 
         mgs.append("----------------------------------------------\n")
 
