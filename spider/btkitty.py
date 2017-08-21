@@ -16,7 +16,6 @@ def searchbt(keywd_list):
 
     driver.get('http://btkitty.pet/')
 
-
     mgs=[]
     for keywd in keywd_list:
         print  "start "+keywd
