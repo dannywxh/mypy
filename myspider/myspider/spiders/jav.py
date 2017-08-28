@@ -13,7 +13,6 @@ class JavSpider(scrapy.Spider):
 
 
     def parse(self, response):
-
         vnames=response.xpath('//div[@class="video"]/a/@title').extract()
         vurls=response.xpath('//div[@class="video"]/a/@href').extract()
         vids=response.xpath('//div[@class="video"]/a/div[@class="id"]/text()').extract()
