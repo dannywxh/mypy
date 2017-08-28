@@ -19,6 +19,10 @@ def searchbt(keywd_list):
 
     driver = webdriver.Chrome()
 
+    #driver.implicitly_wait(10)  #
+    #driver.set_page_load_timeout(10)
+    #driver.set_script_timeout(10)  # 这两种设置都进行才有效
+
     url="http://zhainanbt.com/"
     driver.get(url)
 
@@ -73,7 +77,7 @@ def searchbt(keywd_list):
             for name,url,speed,count in zip(names,urls,speeds,counts):
                 mgs.append(name.get_text()+"\t"+url['href']+"\t"+speed.get_text()+"\t"+count.get_text())
 
-
+        driver.close()
         mgs.append("----------------------------------------------\n")
 
     #print  mgs
@@ -97,7 +101,7 @@ if __name__ == "__main__":
     #chrome()
 
 
-    path=u"F:\\迅雷下载\\CD"
+    path=u"e:\\倉多まお"
     files = [x for x in os.listdir(path) if all([os.path.splitext(x)[1] == '.txt', not os.path.isdir(path + "\\" + x)])]
 
     k = []
