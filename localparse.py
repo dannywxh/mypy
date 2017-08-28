@@ -25,7 +25,7 @@ def getpginfo(url):
        ret= parse(response.content)
        #print ret
 
-def parse(html):
+def parse_letv(html):
         soup = BeautifulSoup(html,"html.parser")
 
         #lis=soup.find_all('li', attrs={'k-name':'send-click-stat'})
@@ -45,20 +45,42 @@ def parse(html):
         return ret
 
 
+def parse1(html):
+    soup = BeautifulSoup(html, "lxml")
+
+    # lis=soup.find_all('li', attrs={'k-name':'send-click-stat'})
+
+    lis = soup.find_all('a')
+
+    print lis
+
+    ret = []
+    for a in lis:
+        ret.append("http://174.127.195.166/forum/" + a['href'])
+
+    with open("d:\\urls.txt","w") as f:
+        for x in ret:
+            f.write(x+"\n")
+
+def parse_bjjt(html):
+    soup = BeautifulSoup(html, "lxml")
+    lis = soup.select('div.text > a')
+    print lis
+
+    with open("d:\\urls_bjjt.txt","w") as f:
+        for a in lis:
+            f.write(a['href']+"\t"+a.get_text().encode('utf8')+"\n")
+
+
 if __name__ == '__main__' :    
   
     #baseurl="chttp://www.le.com/ptv/vplay/20029893.html#vid=20029893"
     #getpginfo(baseurl)
 
-    htmlfile = open("c:\\drj.html", 'r')  #以只读的方式打开本地html文件
+    htmlfile = open("d:\\1.html", 'r')  #以只读的方式打开本地html文件
     html = htmlfile.read()
 
-    ret=parse(html)
+    ret=parse_bjjt(html)
 
-    with open("d:\\url.txt","w") as f:
-        for x in ret:
-            f.write(x+"\n")
 
     
-    
-                
