@@ -2,6 +2,7 @@
 import scrapy
 from javspider.items import JavspiderItem
 import sys
+from javspider.common import format_rule2
 
 reload(sys)
 sys.setdefaultencoding('utf-8')
@@ -16,16 +17,28 @@ class JavspaderSpider(scrapy.Spider):
 
     start_urls=[url+str(offset)]
 
+    has_done=['JUC-540','JUC-542','JUC-552']
+
     def parse(self, response):
 
-        vurls = response.xpath('//div[@class="video"]/a/@href').extract()
+        #vurls = response.xpath('//div[@class="video"]/a/@href').extract()
 
-        vlinks = ['http://www.ja14b.com/cn' + x[1:] for x in vurls]
+        vurls = response.css("div.video > a::attr(href)").extract()
 
-        for link in vlinks:
-            yield scrapy.Request(link,callback=self.parse_detail)
+        print vurls
 
-        if self.offset < 20:
+        vids = response.css("div.video > a > div.id::text").extract()
+
+        print vids
+
+        links = ['http://www.ja14b.com/cn' + x[1:] for x in vurls]
+        for vid, link in zip(vids, links):
+            if vid in self.has_done:
+                print "----------Has Exist!-------------"
+            else:
+                yield scrapy.Request(link, callback=self.parse_detail)
+
+        if self.offset < 2:
             self.offset += 1
 
         yield scrapy.Request(self.url + str(self.offset), callback=self.parse)
@@ -51,7 +64,7 @@ class JavspaderSpider(scrapy.Spider):
 
         item=JavspiderItem()
 
-        item['id']=id
+        item['id']=format_rule2(id)
         item['img']="http:"+img
         item['date']=date
         item['score']=score
