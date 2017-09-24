@@ -229,7 +229,7 @@ def comparelist(src,des):
     for x in src:
         for a,b in des:
             #print x,a,b
-            if coommformat_rule2(x)==format_rule2(a):
+            if common.format_rule2(x)== common.format_rule2(a):
                  dic[x].append(os.path.join(b,a))       
 
     return dic    
@@ -482,16 +482,16 @@ if __name__ == '__main__' :
 
         #walkfile("d:\\new\\")
         #create_htmls(path)
-        #finddup2(d:\\new\\torrent\\")
+        finddup2("c:\\torrent\\")
         #cmp_txt_store(path)
-        cmp_tor_store(path)
+        #cmp_tor_store(path)
         
     else:
         #cmp_txt_store("c:\\torrent")
-        #cmp_tor_store("c:\\torrent")   
+        cmp_tor_store("c:\\torrent")   
         #create_htmls("d:\\dd")
-        #finddup2("d:\\new\\torrent",1)
+        #finddup2("c:\\torrent",1)
         
-        format_vcode(u"H:\\av\\ok")
+        #format_vcode(u"H:\\av\\ok")
 
         #arrange_txt()
