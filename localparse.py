@@ -2,14 +2,17 @@
 # -*- coding: utf-8 -*-
 
 import requests
-
+import sys
 from bs4 import BeautifulSoup
 '''
 功能：基于http的可目录浏览网站文件的递归下载
 
 '''
 
-
+reload(sys)
+#print sys.getdefaultencoding()
+#sys.setdefaultencoding('utf-8')
+print sys.getdefaultencoding()
 
 def getpginfo(url):                  
        headers = {'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
@@ -44,23 +47,29 @@ def parse_letv(html):
 
         return ret
 
-
+#TLF ed2k
 def parse1(html):
     soup = BeautifulSoup(html, "lxml")
 
     # lis=soup.find_all('li', attrs={'k-name':'send-click-stat'})
 
-    lis = soup.find_all('a')
+    lis = soup.find_all('input',attrs={"name": "em0"})
 
     print lis
 
     ret = []
     for a in lis:
-        ret.append("http://174.127.195.166/forum/" + a['href'])
+        print a["value"]
+        try:
+            ret.append(a["value"])
+        except Exception,e:
+            print e
 
-    with open("d:\\urls.txt","w") as f:
+    with open("d:\\urls1.txt","w") as f:
         for x in ret:
-            f.write(x+"\n")
+            f.write(x.encode('utf8')+"\n")
+
+
 
 def parse_bjjt(html):
     soup = BeautifulSoup(html, "lxml")
@@ -77,10 +86,10 @@ if __name__ == '__main__' :
     #baseurl="chttp://www.le.com/ptv/vplay/20029893.html#vid=20029893"
     #getpginfo(baseurl)
 
-    htmlfile = open("d:\\1.html", 'r')  #以只读的方式打开本地html文件
+    htmlfile = open("d:\\2.html", 'r')  #以只读的方式打开本地html文件
     html = htmlfile.read()
 
-    ret=parse_bjjt(html)
+    ret=parse1(html)
 
 
     
