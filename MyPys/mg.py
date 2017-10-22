@@ -23,7 +23,7 @@ class  MyMongodb(object):
     def __init__(self, db_name,collection_name):
         super( MyMongodb, self).__init__()
         self.client=MongoClient('127.0.0.1',27017)
-        self.db=client[db_name]
+        self.db=self.client[db_name]
         self.collection=self.db[collection_name]
 
 
@@ -80,7 +80,7 @@ class  MyMongodb(object):
             except Exception,e:
                 print e
 
-    def txtstore_addtodb(slef,slist):
+    def txtstore_addtodb(self,slist):
         for vid,vname,disk in slist:
             try:
                 self.collection.insert({"code":vid,"name":vname,"disk":disk})
@@ -108,20 +108,20 @@ class  MyMongodb(object):
                 print e
 
 
-'''
-db.jav.aggregate([{ $group: {_id: "$code",count: { $sum: 1 } } },   { $match: { count: { $gt: 1 } } }] )
-
-
- db.jav.find({"fullname":/本田/})
- 
- db.jav.find().count()
-  
- db.jav.find({"code":{"$in":["soe385","jux959", "soe386"]}})
- 
- db.jav.find( { "fullname": { $exists: true } } ).count()
- 
-
-'''
+    '''
+    db.jav.aggregate([{ $group: {_id: "$code",count: { $sum: 1 } } },   { $match: { count: { $gt: 1 } } }] )
+    
+    
+     db.jav.find({"fullname":/本田/})
+     
+     db.jav.find().count()
+      
+     db.jav.find({"code":{"$in":["soe385","jux959", "soe386"]}})
+     
+     db.jav.find( { "fullname": { $exists: true } } ).count()
+     
+    
+    '''
 
     def findmv(self):
         while True:
@@ -161,11 +161,11 @@ db.jav.aggregate([{ $group: {_id: "$code",count: { $sum: 1 } } },   { $match: { 
         #src_files=[avhandle.format2(x):x for x in os.listdir(path) if not os.path.isdir(path+"\\"+x)]
 
         #生成（{code：name}）字典 
-        src_files=dict((avhandle.format_rule2(x), x) for x in os.listdir(path.decode("utf-8")) if not os.path.isdir(path.decode("utf-8")+"\\"+x))
+        src_files=dict((common.format_rule2(x), x) for x in os.listdir(path.decode("utf-8")) if not os.path.isdir(path.decode("utf-8")+"\\"+x))
      
         #print src_files
         
-        dups=find_dup(src_files)
+        dups=self.find_dup(src_files)
         
         savefile=path+"\\dup.txt"
         
@@ -187,10 +187,10 @@ if __name__ == '__main__' :
 
     mm=MyMongodb("mv","jav") 
 #增加新片到库      
-#     des=avhandle.walk_txtstore_file(u"G:\\3",only_code=False)
-#     print len(des)
-#     print des
-#     txtstore_addtodb(des)
+    des=avhandle.walk_txtstore_file(u"G:\\",only_code=False)
+    print len(des)
+    print des
+    mm.txtstore_addtodb(des)
     
     #update_fullname(TXT_INFO_PATH)
     
@@ -205,7 +205,7 @@ if __name__ == '__main__' :
     
 #查找目录下已经存在的片子。与mgdb库比较
     #find_path_dup_from_mgdb("d:\\torrents")
-    mm.find_path_dup_from_mgdb("h:\\0710")
+    #mm.find_path_dup_from_mgdb("G:\\acv")
 
    
     
